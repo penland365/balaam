@@ -28,6 +28,5 @@
 (defn- parse-location [response]
   (get (parse-string (get response :body) true) :location))
 
-(defn lat-long [api-key]
-  (parse-location (location-response api-key))
-)
+(defn location [api-key]
+  (parse-location (location-response api-key)))

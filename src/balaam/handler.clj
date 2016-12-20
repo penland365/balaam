@@ -5,7 +5,7 @@
             [balaam.tmux :as tmux]))
 
 (defroutes app-routes
-  (GET "/tmux/weather" [] (tmux/weather))
+  (GET "/tmux/weather/:g-key/:ds-key" [g-key ds-key] (tmux/weather g-key ds-key))
   (route/not-found "Not Found"))
 
 (def app
