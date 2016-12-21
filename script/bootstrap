@@ -6,4 +6,3 @@ command -v lein >/dev/null 2>&1 || { echo "D\'oh, please: brew install leiningen
 
 lein deps;
 echo "Dependencies installed, good to go!";
-
