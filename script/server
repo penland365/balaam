@@ -1,0 +1,5 @@
+#!/bin/bash
+
+script/bootstrap
+
+lein ring server-headless 8082

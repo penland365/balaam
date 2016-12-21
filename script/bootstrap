@@ -1,0 +1,8 @@
+#!/bin/bash
+
+command -v javac >/dev/null 2>&1 || { echo "D\'oh, please install the Javas."; exit 1; }
+
+command -v lein >/dev/null 2>&1 || { echo "D\'oh, please: brew install leiningen"; exit 1; }
+
+lein deps;
+echo "Dependencies installed, good to go!";
