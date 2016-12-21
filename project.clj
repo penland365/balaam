@@ -14,6 +14,7 @@
   :plugins [[lein-ring "0.9.7"]]
   :source-paths ["src/main/clojure"]
   :resource-paths ["src/main/resources/profiles/prod"]
+  :test-paths ["src/test/clojure"]
   :ring {:handler balaam.handler/app}
   :profiles {:prod {:resource-paths ["src/main/resources/profiles/prod"]}
              :dev  {:resource-paths ["src/main/resources/profiles/dev"]

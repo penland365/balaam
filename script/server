@@ -2,4 +2,4 @@
 
 script/bootstrap
 
-lein ring server-headless 8082
+lein with-profile dev ring server-headless 8082
