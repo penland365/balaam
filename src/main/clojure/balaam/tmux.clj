@@ -21,4 +21,6 @@
   (swap! cache hit-or-miss :weather (delay(#(fresh-weather google-api-key darksky-api-key)))))
 
 (defn weather [google-api-key darksky-api-key]
+  (log/debug "debug weather called")
+  (log/info "info weather called")
   (get (cached-weather google-api-key darksky-api-key) :weather))
