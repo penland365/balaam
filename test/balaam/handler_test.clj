@@ -4,10 +4,10 @@
             [balaam.handler :refer :all]))
 
 (deftest test-app
-  (testing "main route"
-    (let [response (app (mock/request :get "/"))]
+  (testing "tmux weather"
+    (let [response (app (mock/request :get "/tmux/weather"))]
       (is (= (:status response) 200))
-      (is (= (:body response) "Hello World"))))
+      (is (= (:headers {"Content-Type" "text/plain"})))))
 
   (testing "not-found route"
     (let [response (app (mock/request :get "/invalid"))]
