@@ -15,6 +15,7 @@
                  [org.clojure/core.cache "0.6.5"]
                  [ring/ring-defaults "0.2.1"]]
   :plugins [[lein-ring "0.9.7"]]
+  :source-paths ["src/main/clojure"]
   :resource-paths ["src/main/resources"]
   :ring {:handler balaam.handler/app}
   :profiles
