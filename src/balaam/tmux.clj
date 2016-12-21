@@ -1,6 +1,7 @@
 (ns balaam.tmux
   (:require [balaam.clients.google :as google]
             [balaam.clients.darksky :as darksky]
+            [clojure.tools.logging :as log]
             [clojure.core.cache :as cache])
   (:gen-class))
 
@@ -12,7 +13,7 @@
     (cache/miss c k v)))
 
 (defn- fresh-weather [google-api-key darksky-api-key]
-  (println "Fetching fresh-weather")
+  (log/info "Fetching fresh-weather")
   (let [x (darksky/weather (google/location google-api-key) darksky-api-key)]
     (format "%s %s" (get x :temperature) (get x :icon))))
 
