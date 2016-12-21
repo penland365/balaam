@@ -1,6 +1,7 @@
 (ns balaam.handler
   (:require [compojure.core :refer :all]
             [compojure.route :as route]
+            [clojure.tools.logging :as log]
             [ring.middleware.defaults :refer [wrap-defaults site-defaults]]
             [balaam.tmux :as tmux]))
 
