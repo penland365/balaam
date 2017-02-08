@@ -7,7 +7,7 @@ final class LatitudeLongitudeHandler {
   let cache: ExpiryCache
 
   init() {
-    self.cache = ExpiryCache(timeIntervalInSeconds: 60)
+    self.cache = ExpiryCache(timeIntervalInSeconds: 120)
   }
 
   func handle(req: HttpRequest) -> HttpResponse {
@@ -32,7 +32,7 @@ final class LatitudeLongitudeHandler {
       networks = try interface?.scanForNetworks(withName: nil) ?? []
       xs = networks.map { Network.fromCWNetwork(network: $0) }
     } catch {}
-  
+
     return xs
   }
 }
