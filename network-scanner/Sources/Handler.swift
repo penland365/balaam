@@ -7,7 +7,7 @@ final class LatitudeLongitudeHandler {
   let cache: ExpiryCache
 
   init() {
-    self.cache = ExpiryCache(timeIntervalInSeconds: 30)
+    self.cache = ExpiryCache(timeIntervalInSeconds: 60)
   }
 
   func handle(req: HttpRequest) -> HttpResponse {
