@@ -1,5 +1,5 @@
 FROM fedora:25
-MAINTAINER Jeffrey.Davis@sabre.com
+MAINTAINER Jeffrey.N.Davis@gmail.com
 
 RUN dnf upgrade --setopt=deltarpm=false -y && \
   dnf install --setopt=deltarpm=false -y tar xz java-1.8.0-openjdk && \
