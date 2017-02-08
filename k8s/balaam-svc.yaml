@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: balaam
+    tier: frontend
+  name: balaam
+  namespace: default
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 6666
+  selector:
+    app: balaam
+    tier: frontend
+  sessionAffinity: None
+  type: LoadBalancer

@@ -1,0 +1,37 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: balaam
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        tier: frontend
+        app: balaam
+      matchExpressions:
+        - {key: tier, operator: In, values: [frontend]}
+  template:
+    metadata:
+      labels:
+        app: balaam
+        tier: frontend
+    spec:
+      containers:
+      - name: balaam
+        imagePullPolicy: Always
+        image: penland365/balaam:v0.1.0
+        env:
+          - name: HTTP_PORT
+            value: "6666"
+          - name: GOOGLE_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: google.api.key
+          - name: DARKSKY_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: darksky.api.key
+        ports:
+        - containerPort: 6666
