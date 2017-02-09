@@ -81,19 +81,48 @@
             (false? (:ok token)) (redirect-error-code-html)
             :else
               (let [db-user (first db-users)
-                    result (db/insert-slack-token token (:id db-user))]
-               (log/info result) 
-               (redirect-success-html (:username db-user))))))))
-            
-            
-            ;;(redirect-success-html (:username (first db-users)))
-          ;;  :else (redirect-error-code-html))))))
+                    result  (db/insert-slack-token token (:id db-user))
+                    error?  (instance? Throwable result)]
+                (cond
+                  (not error?) (redirect-success-html (:username db-user)
+                  :else (redirect-error-html)))))))))
 
+(defn- list-channels [token]
+  (let [params   (list {:k "token" :v token} {:k "exclude_archived" :v true })
+        endpoint (build-endpoint params "https://slack.com/api/channels.list")
+        resp     (client/get endpoint)]
+    (:channels (parse-string (:body resp) true))))
 
+(defn- find-gen [channels]
+  (first (filter #(= "share" (:name %)) channels)))
 
+(defn- channel-info [token channel]
+  (let [params   (list {:k "token" :v token} { :k "channel" :v channel })
+        endpoint (build-endpoint params "https://slack.com/api/channels.info")
+        resp     (client/get endpoint)]
+    (:channel (parse-string (:body resp) true))))
 
+(defn- channel-history [token channel ts]
+  (let [params   (list {:k "token" :v token} {:k "channel" :v channel} {:k "oldest" :v ts} {:k "inclusive" :v true})
+        endpoint (build-endpoint params "https://slack.com/api/channels.history")
+        resp     (client/get endpoint)]
+    (log/info endpoint)
+    (parse-string (:body resp) true)))
 
+(defn- count-mentions [messages user-id]
+  (let [xs (map #(:text %) messages)
+        predicate (str "<@" user-id ">")
+        ys (map #(.contains % predicate) xs)
+        zs (filter #(true? %) ys)]
+    (count zs)))
 
-
-
-
+(defn get-status-line [user]
+  (let [slack-tokens (db/select-slack-tokens-by-user-id (:id user))
+        slack-token  (:access_token (first slack-tokens))
+        channels     (list-channels slack-token)
+        general      (find-gen channels)
+        channel-id   (:id general)
+        gen          (channel-info slack-token channel-id)
+        history      (channel-history slack-token channel-id (:last_read gen))
+        mention-count (count-mentions (:messages history) (:slack_user_id (first slack-tokens)))]
+    (str "Slack Mentions " mention-count)))

@@ -38,6 +38,7 @@
   (POST "/weather" request (tmux/weather (get request :body)))
   (POST "/users"  request (post-user (get request :body)))
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
+  (GET "/status-lines/slack" request (auth/authorize request slack/get-status-line))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}
         (namespace-then-auth request slack/get-auth))
   (route/not-found "Not Found"))

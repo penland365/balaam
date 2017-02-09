@@ -30,3 +30,6 @@
                                                    :slack_user_id   (:user_id slack)
                                                    :slack_team_name (:team_name slack)
                                                    :slack_team_id   (:team_id slack)})))
+
+(defn select-slack-tokens-by-user-id [user-id]
+  (<!! (query! db ["SELECT id, user_id, access_token, scope, slack_user_id, slack_team_name, slack_team_id FROM balaam.slack_tokens WHERE user_id = $1" user-id])))
