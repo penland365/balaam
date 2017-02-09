@@ -2,10 +2,12 @@
   :description "A Development server for making Oracles"
   :url "https://github.com/penland365/balaam"
   :min-lein-version "2.0.0"
-  :dependencies [[org.clojure/clojure "1.8.0"]
+  :dependencies [[alaisi/postgres.async "0.8.0"]
+                 [org.clojure/clojure "1.8.0"]
                  [cheshire "5.6.3"]
                  [clj-http "2.3.0"]
                  [compojure "1.5.1"]
+                 [crypto-password "0.2.0"]
                  [environ "1.1.0"]
                  [org.clojure/core.cache "0.6.5"]
                  [org.slf4j/slf4j-api "1.7.22"]
