@@ -1,12 +1,13 @@
 (ns balaam.postgres
   (:require [postgres.async :refer :all]
-            [clojure.core.async :refer [<!! go]]))
+            [clojure.core.async :refer [<!! go]]
+            [environ.core :refer [env]]))
 
-(def db (open-db {:hostname "192.168.99.100"
-                  :port 5432
-                  :database "balaam"
-                  :username "moses"
-                  :password "buniversity1"
+(def db (open-db {:hostname (env :database-hostname)
+                  :port     (Integer. (env :database-port))
+                  :database (env :database) 
+                  :username (env :database-username) 
+                  :password (env :database-password)
                   :pool-size 25}))
 
 (defn select-user [username]
