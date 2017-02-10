@@ -8,6 +8,7 @@
             [clojure.string :as str]
             [balaam.tmux :as tmux]
             [balaam.postgres :as db]
+            [balaam.clients.slack :as slack]
             [balaam.auth :as auth])
   (:import [java.security SecureRandom]
            [java.util Base64]))
@@ -26,14 +27,20 @@
             (not error?) {:status 201}
             :else {:status 400 :body {:reason (str "username " (get user "username") " exists")}})))))
 
-(defn get-slack [user]
-  (log/info user)
-  {:status 200})
+(defn- test-route [request]
+  (log/info request)
+  {:status 201})
+
+(defn namespace-then-auth [request handler]
+  (auth/user-namespace-exists? request auth/namespace-auth handler))
 
 (defroutes app-routes
-  (GET  "/data/slack" {:keys [headers params body] :as request} (auth/authorize request get-slack))
   (POST "/weather" request (tmux/weather (get request :body)))
   (POST "/users"  request (post-user (get request :body)))
+  (GET "/redirects/slack" request (slack/redirect (get request :params)))
+  (GET "/status-lines/slack" request (auth/authorize request slack/get-status-line))
+  (GET "/:username/slack/auth"  {:keys [headers username] :as request}
+        (namespace-then-auth request slack/get-auth))
   (route/not-found "Not Found"))
 
 (def app
