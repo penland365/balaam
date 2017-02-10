@@ -37,11 +37,22 @@
   (<!! (query! db ["SELECT id, user_id, access_token, scope, slack_user_id, slack_team_name, slack_team_id FROM balaam.slack_tokens WHERE user_id = $1" user-id])))
 
 (defn select-cached-weather [uid]
-  (<!! (query! db ["SELECT id, user_id, datum_type::text, seconds_to_cache, data, last_modified_at FROM balaam.cached_data WHERE user_id = $1;" uid])))
+  (<!! (query! db ["SELECT id, user_id, datum_type::text, seconds_to_cache, data, last_modified_at FROM balaam.cached_data WHERE user_id = $1 AND datum_type = 'WEATHER';" uid])))
 
 (defn insert-cached-weather [uid json]
   (<!! (insert! db {:table "balaam.cached_data"} {:user_id uid
                                                   :datum_type "WEATHER"
                                                   :data json})))
 (defn update-cached-weather [uid json]
-  (<!! (update! db {:table "balaam.cached_data" :where ["user_id = $1" uid]} {:data json})))
+  (<!! (update! db {:table "balaam.cached_data" :where ["user_id = $1 AND datum_type = 'WEATHER'" uid]} {:data json})))
+
+(defn select-cached-slack [uid]
+  (<!! (query! db ["SELECT id, user_id, datum_type::text, seconds_to_cache, data, last_modified_at FROM balaam.cached_data WHERE user_id = $1 AND datum_type = 'SLACK';" uid])))
+
+(defn insert-cached-slack [uid json]
+  (<!! (insert! db {:table "balaam.cached_data"} {:user_id uid
+                                                  :datum_type "SLACK"
+                                                  :data json})))
+
+(defn update-cached-slack [uid json]
+  (<!! (update! db {:table "balaam.cached_data" :where ["user_id = $1 AND datum_type = 'SLACK'" uid]} {:data json})))

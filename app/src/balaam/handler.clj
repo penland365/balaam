@@ -34,8 +34,11 @@
 (defn namespace-then-auth [request handler]
   (auth/user-namespace-exists? request auth/namespace-auth handler))
 
+(def authorize-then-respond (comp tmux/get-slack auth/authorize))
+
 (defroutes app-routes
   (GET "/data/weather" request (auth/authorize request tmux/get-weather (:headers request) (:params request)))
+  (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
 
   (POST "/users"  request (post-user (get request :body)))
 

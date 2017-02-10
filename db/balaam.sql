@@ -37,7 +37,7 @@ WITH (OIDS=FALSE);
 CREATE TRIGGER update_slack_tokens_last_modified_at BEFORE
   UPDATE ON balaam.slack_tokens FOR EACH ROW EXECUTE PROCEDURE balaam.update_last_modified_at_column();
 
-CREATE TYPE balaam.cached_datum_type AS ENUM ('WEATHER');
+CREATE TYPE balaam.cached_datum_type AS ENUM ('SLACK', 'WEATHER');
 
 CREATE TABLE balaam.cached_data(
   id                SERIAL PRIMARY KEY NOT NULL,

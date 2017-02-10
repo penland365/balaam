@@ -171,3 +171,13 @@
         unread-msg-count (sum-unread unread-chans)
         notifications    (sum-notifications unread-chans slack-token slack-user-id)]
     (str "Notifications " notifications " Messages " unread-msg-count)))
+
+(defn get-data [tokens]
+  (let [stoken           (:access_token (first tokens))
+        suid             (:slack_user_id (first tokens))
+        channels         (list-channels stoken)
+        unread-chans     (unread-channels channels stoken)
+        unread-msg-count (sum-unread unread-chans)
+        notifications    (sum-notifications unread-chans stoken suid)]
+    {:mentions notifications :unread unread-msg-count}))
+
