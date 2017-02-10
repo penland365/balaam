@@ -106,7 +106,6 @@
   (let [params   (list {:k "token" :v token} {:k "channel" :v channel} {:k "oldest" :v ts} {:k "inclusive" :v true})
         endpoint (build-endpoint params "https://slack.com/api/channels.history")
         resp     (client/get endpoint)]
-    (log/info endpoint)
     (parse-string (:body resp) true)))
 
 (defn- count-mentions [messages user-id]
@@ -116,13 +115,22 @@
         zs (filter #(true? %) ys)]
     (count zs)))
 
+(defn- mentions-in-channel [tuple]
+  (let [channel-id    (:id (:channel tuple))
+        slack-token   (:token tuple)
+        slack-user-id (:userid tuple)
+        info          (channel-info slack-token channel-id)
+        history       (channel-history slack-token channel-id (:last_read info))]
+    (count-mentions (:messages history) slack-user-id)))
+
+(defrecord ChanTokenId [channel token userid])
+
 (defn get-status-line [user]
-  (let [slack-tokens (db/select-slack-tokens-by-user-id (:id user))
-        slack-token  (:access_token (first slack-tokens))
-        channels     (list-channels slack-token)
-        general      (find-gen channels)
-        channel-id   (:id general)
-        gen          (channel-info slack-token channel-id)
-        history      (channel-history slack-token channel-id (:last_read gen))
-        mention-count (count-mentions (:messages history) (:slack_user_id (first slack-tokens)))]
-    (str "Slack Mentions " mention-count)))
+  (let [slack-tokens  (db/select-slack-tokens-by-user-id (:id user))
+        slack-token   (:access_token (first slack-tokens))
+        slack-user-id (:slack_user_id (first slack-tokens))
+        channels      (list-channels slack-token)
+        xs            (map #(ChanTokenId. % slack-token slack-user-id) channels)
+        ys            (pmap mentions-in-channel xs)
+        total         (reduce + ys)]
+      (str "Slack Mentions " total)))
