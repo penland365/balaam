@@ -35,8 +35,10 @@
   (auth/user-namespace-exists? request auth/namespace-auth handler))
 
 (defroutes app-routes
-  (POST "/weather" request (tmux/weather (get request :body)))
+  (GET "/data/weather" request (auth/authorize request tmux/get-weather (:headers request) (:params request)))
+
   (POST "/users"  request (post-user (get request :body)))
+
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
   (GET "/status-lines/slack" request (auth/authorize request slack/get-status-line))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}

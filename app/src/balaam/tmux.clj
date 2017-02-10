@@ -1,28 +1,52 @@
 (ns balaam.tmux
   (:require [balaam.clients.google :as google]
             [balaam.clients.darksky :as darksky]
-            [clojure.core.cache :as cache]
-            [clojure.tools.logging :as log]
-            [environ.core :refer [env]])
+            [balaam.postgres :as db]
+            [cheshire.core :refer :all]
+            [clojure.string :as str]
+            [clojure.tools.logging :as log])
+  (:import [java.time.temporal ChronoUnit]
+           [java.time Instant])
   (:gen-class))
 
-(def cache(atom(cache/ttl-cache-factory {} :ttl 120000)))
+(defn- format-response [xs]
+  (let [content (first xs)
+        weather (last xs)
+        text? (str/starts-with? content "text/plain")]
+    (cond
+      (true? text?) (format "%s %s" (:temperature weather) (:icon weather))
+      :else {:status 200 :body weather})))
 
-(defn- hit-or-miss [c k v]
-  (if (cache/has? c k)
-    (cache/hit c k)
-    (cache/miss c k v)))
+(defn- expired? [results]
+  (let [x          (first results)
+        fixed      (.minus (.toInstant (:last_modified_at x)) 6 ChronoUnit/HOURS) ;; to UTC because OMG SQL Timestamp
+        expires-at (.plusSeconds fixed (:seconds_to_cache x))
+        now        (Instant/now)]
+    (.isAfter now expires-at)))
 
-(defn- fresh-weather [wifis]
-  (log/info "Fetching fresh-weather")
-  (let [location (google/location wifis)
-        weather  (darksky/weather location)]
-    (log/info "Caching Weather -------------> " weather)
-    (format "%s %s" (:temperature weather) (:icon weather))))
+(defn- get-fresh-weather [wifis]
+  (let [location (google/location wifis)]
+    (darksky/weather location)))
 
-(defn- cached-weather [wifis]
-  (swap! cache hit-or-miss :weather (delay(#(fresh-weather wifis)))))
+(defn- refresh-weather [wifis content uid]
+  (let [weather (get-fresh-weather wifis)
+        _       (db/update-cached-weather uid weather)]
+  [content weather]))
 
-(defn weather [wifis]
-  (let [x (cached-weather wifis)]
-    (:weather x)))
+(defn- load-weather [wifis content uid]
+  (let [weather (get-fresh-weather wifis)
+        _       (db/insert-cached-weather uid weather)]
+    [content weather]))
+
+(def refresh-and-format (comp format-response refresh-weather))
+(def load-and-format    (comp format-response load-weather))
+
+(defn get-weather [user args]
+  (let [content (get (first args) "accept")
+        wifis   (parse-string (:wifis (last args)) true)
+        xs      (db/select-cached-weather (:id user))]
+    (cond
+      (empty? xs)           (load-and-format wifis content (:id user))
+      (true? (expired? xs)) (refresh-and-format wifis content (:id user))
+      :else
+        (format-response [content (:data (first xs))]))))

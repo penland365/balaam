@@ -36,3 +36,18 @@ CREATE TABLE balaam.slack_tokens(
 WITH (OIDS=FALSE);
 CREATE TRIGGER update_slack_tokens_last_modified_at BEFORE
   UPDATE ON balaam.slack_tokens FOR EACH ROW EXECUTE PROCEDURE balaam.update_last_modified_at_column();
+
+CREATE TYPE balaam.cached_datum_type AS ENUM ('WEATHER');
+
+CREATE TABLE balaam.cached_data(
+  id                SERIAL PRIMARY KEY NOT NULL,
+  user_id           INT REFERENCES balaam.users(id) NOT NULL,
+  datum_type        balaam.cached_datum_type NOT NULL,
+  seconds_to_cache  SMALLINT NOT NULL DEFAULT 120,
+  data              JSONB NOT NULL,
+  last_modified_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT Now(),
+  inserted_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT Now()
+)
+WITH (OIDS=FALSE);
+CREATE TRIGGER update_cached_data_last_modified_at BEFORE
+  UPDATE ON balaam.cached_data FOR EACH ROW EXECUTE PROCEDURE balaam.update_last_modified_at_column();
