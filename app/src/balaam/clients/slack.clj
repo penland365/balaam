@@ -103,34 +103,71 @@
     (:channel (parse-string (:body resp) true))))
 
 (defn- channel-history [token channel ts]
-  (let [params   (list {:k "token" :v token} {:k "channel" :v channel} {:k "oldest" :v ts} {:k "inclusive" :v true})
+  (let [params   (list {:k "token" :v token} {:k "channel" :v channel} {:k "oldest" :v ts} {:k "inclusive" :v false})
         endpoint (build-endpoint params "https://slack.com/api/channels.history")
         resp     (client/get endpoint)]
     (parse-string (:body resp) true)))
 
+(defrecord MU [message predicate])
+
+(defn- cont [mu]
+  (let [x (.contains (:message mu) (:predicate mu))]
+    (cond
+      (true? x) (log/info (:message mu)))
+     x))
+
 (defn- count-mentions [messages user-id]
-  (let [xs (map #(:text %) messages)
+  (let [xs        (map #(:text %) messages)
         predicate (str "<@" user-id ">")
-        ys (map #(.contains % predicate) xs)
-        zs (filter #(true? %) ys)]
+        mus       (map #(MU. % predicate) xs)
+        ys        (map cont mus)
+        zs        (filter #(true? %) ys)]
     (count zs)))
 
+(defrecord ChanTokenId [info token userid])
 (defn- mentions-in-channel [tuple]
-  (let [channel-id    (:id (:channel tuple))
-        slack-token   (:token tuple)
-        slack-user-id (:userid tuple)
-        info          (channel-info slack-token channel-id)
-        history       (channel-history slack-token channel-id (:last_read info))]
-    (count-mentions (:messages history) slack-user-id)))
+  (let [info       (:info tuple)
+        stoken     (:token tuple)
+        suserid    (:userid tuple)
+        channel-id (:id info)
+        lread      (:last_read info)
+        history    (channel-history stoken channel-id lread)
+        messages   (:messages history)]
+    (count-mentions messages suserid)))
 
-(defrecord ChanTokenId [channel token userid])
+(defrecord ChanRead [read? info])
+(defn- unread_chan? [stokenchan]
+  (let [stoken  (:stoken stokenchan)
+        channel (:channel stokenchan)
+        info    (channel-info stoken (:id channel))]
+    (cond
+      (nil? (:unread_count_display info))   (ChanRead. false info)
+      (= (:unread_count_display info) 0)    (ChanRead. false info)
+      :else (ChanRead. true info))))
+
+(defrecord STokenChan [stoken channel])
+(defn- unread-channels [channels stoken]
+  (let [token-channels   (map #(STokenChan. stoken %) channels)
+        unread_channels? (pmap unread_chan? token-channels)
+        unread_channels  (filter #(:read? %) unread_channels?)
+        xs               (map #(:info %) unread_channels)]
+    xs))
+
+(defn- sum-unread [channels]
+  (let [xs (map #(:unread_count_display %) channels)]
+    (reduce + xs)))
+
+(defn- sum-notifications [infos stoken suserid]
+  (let [xs (map #(ChanTokenId. % stoken suserid) infos)
+        ys (pmap mentions-in-channel xs)]
+    (reduce + ys)))
 
 (defn get-status-line [user]
-  (let [slack-tokens  (db/select-slack-tokens-by-user-id (:id user))
-        slack-token   (:access_token (first slack-tokens))
-        slack-user-id (:slack_user_id (first slack-tokens))
-        channels      (list-channels slack-token)
-        xs            (map #(ChanTokenId. % slack-token slack-user-id) channels)
-        ys            (pmap mentions-in-channel xs)
-        total         (reduce + ys)]
-      (str "Slack Mentions " total)))
+  (let [slack-tokens     (db/select-slack-tokens-by-user-id (:id user))
+        slack-token      (:access_token (first slack-tokens))
+        slack-user-id    (:slack_user_id (first slack-tokens))
+        channels         (list-channels slack-token)
+        unread-chans     (unread-channels channels slack-token)
+        unread-msg-count (sum-unread unread-chans)
+        notifications    (sum-notifications unread-chans slack-token slack-user-id)]
+    (str "Notifications " notifications " Messages " unread-msg-count)))
