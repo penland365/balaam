@@ -55,7 +55,7 @@
 
 
 
-(defn authorize [request handler ]
+(defn authorize [request handler & args]
   "Determines whether the user has Authorization to a specific resource.
    If the answer is yes, the handler is invoked"
   (let [header-value (get-in request [:headers "authorization"])]
@@ -77,7 +77,7 @@
                       (cond
                         (not valid) {:status 401 :body {:reason "invalid username or password"}}
                         :else
-                          (handler db-user))))))))))
+                          (handler db-user args))))))))))
 
 (defn salt [num-bytes]
   "Returns a secure ( yet still pseudo ) Random Salt. Note that the length of the Base64 encoded 

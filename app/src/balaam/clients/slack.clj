@@ -84,8 +84,9 @@
                     result  (db/insert-slack-token token (:id db-user))
                     error?  (instance? Throwable result)]
                 (cond
-                  (not error?) (redirect-success-html (:username db-user)
-                  :else (redirect-error-html)))))))))
+                  (not error?) (redirect-success-html (:username db-user))
+                  :else 
+                    (redirect-error-html (:id db-user)))))))))
 
 (defn- list-channels [token]
   (let [params   (list {:k "token" :v token} {:k "exclude_archived" :v true })
@@ -171,3 +172,33 @@
         unread-msg-count (sum-unread unread-chans)
         notifications    (sum-notifications unread-chans slack-token slack-user-id)]
     (str "Notifications " notifications " Messages " unread-msg-count)))
+
+(defn- data-per-room [record]
+  "Gets all relevent data per room."
+  (let [stoken           (:access_token record)
+        suid             (:slack_user_id record)
+        channels         (list-channels stoken)
+        unread-chans     (unread-channels channels stoken)
+        unread-msg-count (sum-unread unread-chans)
+        notifications    (sum-notifications unread-chans stoken suid)]
+    {:mentions notifications :unread unread-msg-count}))
+
+;;(defn get-data [tokens]
+;;  (let [stoken           (:access_token (first tokens))
+;;        suid             (:slack_user_id (first tokens))
+;;        channels         (list-channels stoken)
+;;        unread-chans     (unread-channels channels stoken)
+;;        unread-msg-count (sum-unread unread-chans)
+;;        notifications    (sum-notifications unread-chans stoken suid)]
+;;    {:mentions notifications :unread unread-msg-count}))
+
+(defn- slack+ [x y]
+  "A function to be folded into a list of slack records"
+  (let [mentions (+ (:mentions x) (:mentions y))
+        msgs     (+ (:unread x) (:unread y))]
+  {:mentions mentions :unread msgs}))
+
+
+(defn get-data [records]
+  (let [room-counts (pmap data-per-room records)]
+    (reduce slack+ room-counts)))

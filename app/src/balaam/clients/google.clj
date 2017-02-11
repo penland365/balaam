@@ -11,11 +11,11 @@
 
 (defn ap [wifi]
   (hash-map
-    :macAddress          (get wifi "mac_address")
-    :age                 (get wifi "age")
-    :channel             (get wifi "channel")
-    :signalStrength      (get wifi "signal_strength")
-    :signalToNoiseRation (get wifi "signal_to_noise_ratio")))
+    :macAddress         (:mac_address wifi) ;;(get wifi "mac_address")
+    :age                (:age wifi) ;;(get wifi "age")
+    :channel            (:channel wifi) ;;(get wifi "channel")
+    :signalStrength     (:signal_strength wifi) ;;(get wifi "signal_strength")
+    :signalToNoiseRatio (:signal_to_noise_ratio wifi))) ;;(get wifi "signal_to_noise_ratio")))
 
 (defn- request [wifis]
   {
@@ -43,6 +43,5 @@
         req  (request xs)
         resp (post-location req)
         loc  (get (parse-string (get resp :body) true) :location)]
-    (log/info "Current Location --> " loc)
     loc))
 
