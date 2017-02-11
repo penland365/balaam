@@ -1,9 +1,10 @@
 (ns balaam.auth
-  (:require [clojure.string :as str]
+  (:require [balaam.postgres :as db]
+            [balaam.util :as u]
+            [clojure.string :as str]
             [clojure.tools.logging :as log]
             [compojure.core :refer :all]
-            [crypto.password.scrypt :as passwd]
-            [balaam.postgres :as db])
+            [crypto.password.scrypt :as passwd])
   (:import  [java.security SecureRandom]
             [java.util Base64])
   (:gen-class))
@@ -78,15 +79,6 @@
                         (not valid) {:status 401 :body {:reason "invalid username or password"}}
                         :else
                           (handler db-user args))))))))))
-
-(defn salt [num-bytes]
-  "Returns a secure ( yet still pseudo ) Random Salt. Note that the length of the Base64 encoded 
-  salt may differ from the length passed in, which determines the number of random bytes chosen."
-  (let [random    (SecureRandom.)
-        xs        (byte-array num-bytes)
-        _         (.nextBytes random xs)
-        encoder   (Base64/getEncoder)]
-    (.encodeToString encoder xs)))
 
 (defn encrypt [password s]
   (let [comb      (str s "." password)

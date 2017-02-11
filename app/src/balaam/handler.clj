@@ -9,6 +9,8 @@
             [balaam.tmux :as tmux]
             [balaam.postgres :as db]
             [balaam.clients.slack :as slack]
+            [balaam.clients.github :as gh]
+            [balaam.util :as u]
             [balaam.auth :as auth])
   (:import [java.security SecureRandom]
            [java.util Base64]))
@@ -19,7 +21,7 @@
     (cond
       (< password-length 7) {:status 400 :body {:reason "Password must be at least 7 characters"}}
       :else
-        (let [salt      (auth/salt 71)
+        (let [salt      (u/salt 71)
               encrypted (auth/encrypt password salt)
               result    (db/wait-insert-user (get user "username") encrypted salt)
               error?    (instance? Throwable result)]
@@ -45,6 +47,8 @@
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}
         (namespace-then-auth request slack/get-auth))
+  (GET "/:username/github/auth" {:keys [headers username] :as request}
+       (namespace-then-auth request gh/get-auth))
   (route/not-found "Not Found"))
 
 (def app

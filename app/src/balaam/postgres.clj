@@ -56,3 +56,8 @@
 
 (defn update-cached-slack [uid json]
   (<!! (update! db {:table "balaam.cached_data" :where ["user_id = $1 AND datum_type = 'SLACK'" uid]} {:data json})))
+
+(defn insert-pending-github-token [uid state]
+  (<!! (insert! db {:table "balaam.github_tokens"} {:user_id uid
+                                                    :auth_status "PENDING"
+                                                    :state state})))

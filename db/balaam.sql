@@ -51,3 +51,20 @@ CREATE TABLE balaam.cached_data(
 WITH (OIDS=FALSE);
 CREATE TRIGGER update_cached_data_last_modified_at BEFORE
   UPDATE ON balaam.cached_data FOR EACH ROW EXECUTE PROCEDURE balaam.update_last_modified_at_column();
+
+CREATE TYPE balaam.github_auth_statuses AS ENUM ('PENDING', 'COMPLETED');
+
+CREATE TABLE balaam.github_tokens(
+  id                SERIAL PRIMARY KEY NOT NULL,
+  user_id           INT REFERENCES balaam.users(id) NOT NULL UNIQUE,
+  access_token      VARCHAR(100) DEFAULT NULL,
+  auth_status       balaam.github_auth_statuses NOT NULL,
+  state             VARCHAR(100) NOT NULL,
+  scope             VARCHAR(50) DEFAULT NULL,
+  token_type        VARCHAR(25) DEFAULT NULL,
+  last_modified_at  TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT Now(),
+  inserted_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT Now()
+)
+WITH (OIDS=FALSE);
+CREATE TRIGGER update_github_tokens_last_modified_at BEFORE
+  UPDATE ON balaam.github_tokens FOR EACH ROW EXECUTE PROCEDURE balaam.update_last_modified_at_column();
