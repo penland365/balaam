@@ -23,13 +23,9 @@
 
 (defn- expired? [results]
   (let [x             (first results)
-        ;;last-modified (.minus (.toInstant (:last_modified_at x)) 6 ChronoUnit/HOURS)
         last-modified (.toInstant (:last_modified_at x))
         expires-at    (.plusSeconds last-modified (:seconds_to_cache x))
         now           (Instant/now)]
-    (log/info "last-modified instant ---> " last-modified)
-    (log/info "expires-at instant ------> " expires-at)
-    (log/info "now() instant -----------> " now)
     (.isAfter now expires-at)))
 
 (defn- get-fresh-weather [wifis]

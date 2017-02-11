@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: balaam-config
+  namespace: default
+data:
+  http.port: "6666"
+  postgres.host: balaam-postgres.default.svc.cluster.local 
+  postgres.db: balaam 
+  postgres.port: "5432"
+  postgres.user: moses
+  slack.redirect.uri: http://104.198.135.229/redirects/slack

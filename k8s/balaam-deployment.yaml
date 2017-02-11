@@ -19,7 +19,7 @@ spec:
       containers:
       - name: balaam
         imagePullPolicy: Always
-        image: penland365/balaam:v0.1.0
+        image: penland365/balaam:v0.2.1
         env:
           - name: HTTP_PORT
             value: "6666"
@@ -33,5 +33,45 @@ spec:
               secretKeyRef:
                 name: balaam-secrets
                 key: darksky.api.key
+          - name: DATABASE_HOSTNAME
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.host
+          - name: DATABASE_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.port
+          - name: DATABASE
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.db
+          - name: DATABASE_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.user
+          - name: DATABASE_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: postgres.password
+          - name: SLACK_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: slack.client.id
+          - name: SLACK_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: slack.client.secret
+          - name: SLACK_REDIRECT_URI
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: slack.redirect.uri
         ports:
         - containerPort: 6666

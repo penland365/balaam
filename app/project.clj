@@ -1,4 +1,4 @@
-(defproject balaam "0.1.0"
+(defproject balaam "0.2.1"
   :description "A Development server for making Oracles"
   :url "https://github.com/penland365/balaam"
   :min-lein-version "2.0.0"

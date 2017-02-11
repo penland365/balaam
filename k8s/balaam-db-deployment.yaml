@@ -1,0 +1,39 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: balaam-postgres
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        tier: backend
+        app: balaam-db
+      matchExpressions:
+        - {key: tier, operator: In, values: [backend]}
+  template:
+    metadata:
+      labels:
+        app: balaam-db
+        tier: backend
+    spec:
+      containers:
+      - name: balaam 
+        image: penland365/balaam-db:v0.1.2
+        env:
+          - name: POSTGRES_USER 
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.user
+          - name: POSTGRES_DB 
+            valueFrom:
+              configMapKeyRef:
+                name: balaam-config
+                key: postgres.db
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: balaam-secrets
+                key: postgres.password
+        ports:
+        - containerPort: 5432
