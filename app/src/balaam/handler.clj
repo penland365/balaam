@@ -11,6 +11,7 @@
             [balaam.clients.slack :as slack]
             [balaam.resources.data :as data]
             [balaam.resources.github :as gh]
+            [balaam.resources.users :as users]
             [balaam.util :as u]
             [balaam.auth :as auth])
   (:import [java.security SecureRandom]
@@ -44,6 +45,8 @@
   (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
   (GET "/data/github" request(auth/authorize request data/github (:headers request) (:params request)))
 
+  (GET "/users" [] users/index-users)
+  (GET "/users/:id" [id] (users/show-user id))
   (POST "/users"  request (post-user (get request :body)))
 
   (GET "/redirects/slack" request (slack/redirect (get request :params)))

@@ -20,6 +20,21 @@
 (defn select-user [username]
   (<!! (query! db ["SELECT id, username, password, salt FROM balaam.users WHERE username = $1" username])))
 
+(defn select-users []
+  (<!! (query! db ["SELECT id, username, last_modified_at, inserted_at
+                   FROM balaam.users
+                   ORDER BY id ASC;"])))
+
+(defn select-external-user-by-id [id]
+  (<!! (query! db ["SELECT id, username, last_modified_at, inserted_at
+                   FROM balaam.users
+                   WHERE id = $1;" id])))
+
+(defn select-external-user-by-username [username]
+  (<!! (query! db ["SELECT id, username, last_modified_at, inserted_at
+                   FROM balaam.users
+                   WHERE username = $1;" username])))
+
 (defn select-user-by-id [id]
   (<!! (query! db ["SELECT id, username, password, salt FROM balaam.users WHERE id = $1" id])))
 
