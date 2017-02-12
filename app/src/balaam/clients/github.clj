@@ -54,3 +54,10 @@
     (catch Object _
       (log/error (:throwable &throw-context) "unexpected error")
       (throw+)))))
+
+(defn get-notifications [access-token]
+  (let [resp (client/get "https://api.github.com/notifications" 
+                         {:accept "application/vnd.github.v3+json"
+                          :oauth-token access-token})
+        xs   (parse-string (:body resp) true)]
+    xs))

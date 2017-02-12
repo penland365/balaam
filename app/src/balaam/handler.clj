@@ -9,6 +9,7 @@
             [balaam.tmux :as tmux]
             [balaam.postgres :as db]
             [balaam.clients.slack :as slack]
+            [balaam.resources.data :as data]
             [balaam.resources.github :as gh]
             [balaam.util :as u]
             [balaam.auth :as auth])
@@ -41,6 +42,7 @@
 (defroutes app-routes
   (GET "/data/weather" request (auth/authorize request tmux/get-weather (:headers request) (:params request)))
   (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
+  (GET "/data/github" request(auth/authorize request data/github (:headers request) (:params request)))
 
   (POST "/users"  request (post-user (get request :body)))
 

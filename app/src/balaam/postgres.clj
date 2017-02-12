@@ -12,6 +12,11 @@
                   :password (env :database-password)
                   :pool-size 25}))
 
+(defn- select-cached-data [uid datum-type]
+  (<!! (query! db ["SELECT id, user_id, datum_type::text, seconds_to_cache, data, last_modified_at 
+                   FROM balaam.cached_data 
+                   WHERE user_id = $1 AND datum_type = $2;" uid datum-type])))
+
 (defn select-user [username]
   (<!! (query! db ["SELECT id, username, password, salt FROM balaam.users WHERE username = $1" username])))
 
@@ -72,3 +77,25 @@
                      :auth_status  "COMPLETED"
                      :scope        (:scope gh-token)
                      :token_type   (:token_type gh-token)})))
+
+(defn select-gh-tokens-by-user-id [uid]
+  (<!! (query! db ["SELECT id, user_id, access_token FROM balaam.github_tokens WHERE auth_status = 'COMPLETED' AND user_id = $1;" uid])))
+
+(defn- insert-cached-data [uid json datum-type]
+  (<!! (insert! db {:table "balaam.cached_data"} {:user_id uid
+                                                  :datum_type datum-type
+                                                  :data json})))
+
+(defn- update-cached-data [uid json datum-type]
+  (<!! (update! db {:table "balaam.cached_data" 
+                    :where ["user_id = $1 AND datum_type = $2;" uid datum-type]} 
+                    {:data json})))
+
+(defn select-cached-github[uid]
+  (select-cached-data uid "GITHUB"))
+
+(defn insert-cached-github [uid data]
+  (insert-cached-data uid data "GITHUB"))
+
+(defn update-cached-github [uid data]
+  (update-cached-data uid data "GITHUB"))
