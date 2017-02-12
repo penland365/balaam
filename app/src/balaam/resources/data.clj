@@ -23,10 +23,10 @@
 (defn- format-github-response [xs]
   (if (text? (:content xs))
     (if (nil? (:state (:data xs)))
-      (format "Notifications %s Mentions %s" (:notifications (:data xs)) (:mentions (:data xs)))
-      (format "Notifications %s Mentions %s Branch State %s" (:notifications (:data xs)) 
-                                                             (:mentions (:data xs))
-                                                             (:state (:data xs))))
+      (format "Mentions %s Notifs %s" (:mentions (:data xs)) (:notifications (:data xs)))
+      (format "Mentions %s Notifs %s Branch State %s" (:mentions (:data xs))
+                                                       (:notifications (:data xs))
+                                                       (:state (:data xs))))
     {:status 200 :body (:data xs)}))
 
 (defn- github-mention+
