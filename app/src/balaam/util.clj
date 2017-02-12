@@ -1,10 +1,8 @@
 (ns balaam.util
   (:require [clojure.core.reducers :as r]
-            [clojure.core.reducers :as r]
             [clojure.string :as str])
   (:import  [java.security SecureRandom]
-            [java.util Base64])
-  (:gen-class))
+            [java.util Base64]))
 
 (defn salt [num-bytes]
   "Returns a secure ( yet still pseudo ) Random Salt. Note that the length of the Base64 encoded 
@@ -15,11 +13,11 @@
         encoder   (Base64/getEncoder)]
     (.encodeToString encoder xs)))
 
-(defn- param+ [param]
+(defn param+ [param]
   "Takes a map of param key and value, combining them"
   (str (:k param) "=" (:v param)))
 
-(defn- query+ 
+(defn query+ 
   "A function to be folded into a list of param pairs to build a query string"
   ([] "")
   ([x y] (str x "&" y)))

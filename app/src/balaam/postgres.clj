@@ -61,3 +61,14 @@
   (<!! (insert! db {:table "balaam.github_tokens"} {:user_id uid
                                                     :auth_status "PENDING"
                                                     :state state})))
+
+(defn select-pending-gh-token-by-state [state]
+  (<!! (query! db ["SELECT id, user_id, state FROM balaam.github_tokens WHERE auth_status = 'PENDING' AND state = $1;" state])))
+
+(defn update-gh-token [id gh-token]
+  (<!! (update! db {:table "balaam.github_tokens" 
+                    :where ["id = $1 AND auth_status = 'PENDING'" id]}
+                    {:access_token (:access_token gh-token)
+                     :auth_status  "COMPLETED"
+                     :scope        (:scope gh-token)
+                     :token_type   (:token_type gh-token)})))

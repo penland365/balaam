@@ -1,12 +1,12 @@
-(ns balaam.clients.github
+(ns balaam.resources.github
   (:require [balaam.postgres :as db]
             [balaam.util :as u]
+            [balaam.clients.github :as ghub]
             [cheshire.core :refer :all]
             [clj-http.client :as client]
             [clojure.string :as str]
             [clojure.tools.logging :as log]
             [environ.core :refer [env]])
-  (:use [slingshot.slingshot :only [throw+ try+]])
   (:import [java.net URLEncoder])
   (:gen-class))
 
@@ -30,27 +30,26 @@
       :else 
         (let [encoded-state (URLEncoder/encode state "UTF-8")
               params        (conj base-auth-params {:k "state" :v encoded-state})
-              url           (u/build-endpoint params auth-url)]
+              url    (u/build-endpoint params auth-url)]
+          (log/info "Original State --> " state)
+          (log/info "Encoded STate -->  " encoded-state)
           {:status 200 :body {:url url}}))))
 
-(def access-token-url "https://github.com/login/oauth/access_token")
-(def base-at-params [{:k "client_id" :v client-id} {:k "client_secret" :v client-secret}])
+(defn- redirect-error-html []
+  (str "<h1>Balaam: an error has occurred during Github OAuth.</h1>"))
+(defn- redirect-success-html [username]
+  (str "<h1>Balaam thanks you " username "!</h1><h2>Github integration had been enabled.</h2>"))
 
-(defn post-access-token [code state]
-  (let [params (conj base-at-params {:k "code" :v code} {:k "state" :v state})]
-  (try+
-    (client/post "https://github.com/login/oauth/access_token" 
-                 {:accept  :json
-                  :content :json
-                  :query-params {:client_id     client-id
-                                 :client_secret client-secret
-                                 :code          code
-                                 :state         state}}
-                 {:throw-entire-message? true})
-    (catch {:status 400} {:keys [body]}
-      (log/error body))
-    (catch {:status 404} {:keys [body]}
-      (log/error body))
-    (catch Object _
-      (log/error (:throwable &throw-context) "unexpected error")
-      (throw+)))))
+(defn register-callback [params]
+  (let [results (db/select-pending-gh-token-by-state (:state params))]
+    (cond
+      (not= (count results) 1) (redirect-error-html)
+      :else 
+        (let [resp     (ghub/post-access-token (:code params) (:state params))
+              gh-token (parse-string (:body resp) true)
+              update-result (db/update-gh-token (:id (first results)) gh-token)]
+          (cond
+            (not= (:updated update-result) 1) (redirect-error-html)
+            :else
+              (let [users (db/select-user-by-id (:user_id (first results)))]
+                (redirect-success-html (:username (first users)))))))))

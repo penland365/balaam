@@ -9,7 +9,7 @@
             [balaam.tmux :as tmux]
             [balaam.postgres :as db]
             [balaam.clients.slack :as slack]
-            [balaam.clients.github :as gh]
+            [balaam.resources.github :as gh]
             [balaam.util :as u]
             [balaam.auth :as auth])
   (:import [java.security SecureRandom]
@@ -47,8 +47,11 @@
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}
         (namespace-then-auth request slack/get-auth))
+
+  (GET "/callbacks/github" request (gh/register-callback (:params request)))
   (GET "/:username/github/auth" {:keys [headers username] :as request}
        (namespace-then-auth request gh/get-auth))
+
   (route/not-found "Not Found"))
 
 (def app
