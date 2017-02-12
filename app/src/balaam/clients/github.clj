@@ -61,3 +61,10 @@
                           :oauth-token access-token})
         xs   (parse-string (:body resp) true)]
     xs))
+
+(defn get-branch-status [access-token owner repo branch]
+  (let [url  (str "https://api.github.com/repos/" owner "/" repo "/commits/" branch "/statuses")
+        resp (client/get url {:accept "application/vnd.github.v3+json"
+                              :oauth-token access-token})
+        xs   (parse-string (:body resp) true)]
+    xs))
