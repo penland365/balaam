@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+WEATHER=$(curl -s -u $BALAAM_USER":"$BALAAM_PASSWORD --header "Accept: text/plain" $BALAAM_URL"/data/slack")
+echo $WEATHER

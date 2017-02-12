@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+GITHUB=$(curl -s -X GET -u $BALAAM_USER":"$BALAAM_PASSWORD --header "Accept: text/plain" $BALAAM_URL"/data/github")
+echo $GITHUB
