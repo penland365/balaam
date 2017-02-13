@@ -25,6 +25,10 @@
                    FROM balaam.users
                    ORDER BY id ASC;"])))
 
+(defn update-user [uid pword salt]
+  (<!! (update! db {:table "balaam.users" :where ["id = $1;" uid]} {:password pword 
+                                                                    :salt     salt})))
+
 (defn select-external-user-by-id [id]
   (<!! (query! db ["SELECT id, username, last_modified_at, inserted_at
                    FROM balaam.users

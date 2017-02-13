@@ -17,20 +17,6 @@
   (:import [java.security SecureRandom]
            [java.util Base64]))
 
-(defn- post-user [user]
-  (let [password        (get user "password")
-        password-length (count password)]
-    (cond
-      (< password-length 7) {:status 400 :body {:reason "Password must be at least 7 characters"}}
-      :else
-        (let [salt      (u/salt 71)
-              encrypted (auth/encrypt password salt)
-              result    (db/wait-insert-user (get user "username") encrypted salt)
-              error?    (instance? Throwable result)]
-          (cond
-            (not error?) {:status 201}
-            :else {:status 400 :body {:reason (str "username " (get user "username") " exists")}})))))
-
 (defn- test-route [request]
   (log/info request)
   {:status 201})
@@ -47,7 +33,8 @@
 
   (GET "/users" [] users/index-users)
   (GET "/users/:id" [id] (users/show-user id))
-  (POST "/users"  request (post-user (get request :body)))
+  (POST "/users"  request (users/post-user (get request :body)))
+  (PATCH "/users" request (auth/authorize request users/patch-user (:body request)))
 
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}
