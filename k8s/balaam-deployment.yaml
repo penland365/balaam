@@ -19,7 +19,7 @@ spec:
       containers:
       - name: balaam
         imagePullPolicy: Always
-        image: penland365/balaam:v0.2.2
+        image: penland365/balaam:v0.2.3
         env:
           - name: HTTP_PORT
             value: "6666"
