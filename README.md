@@ -2,6 +2,8 @@ balaam - Managing your TMUX status bar.
 ====
 ![TMUX Status Bar](https://raw.githubusercontent.com/penland365/balaam/docs/images/status-bar.png)
 
+![Weather Status](https://raw.githubusercontent.com/penland365/balaam/docs/images/right-status.png)
+
 Balaam is a server built to collate and manage your TMUX status bar. By default, TMUX refreshes every
 5 seconds, making any dashboard difficult to manage without some level of cache. Balaam manages
 several gnarly data sources to give you a snapshot of what you absolute have to know at any instant.
