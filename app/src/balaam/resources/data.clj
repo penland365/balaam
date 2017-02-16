@@ -1,5 +1,7 @@
 (ns balaam.resources.data
-  (:require [balaam.clients.github :as gh]
+  (:require [balaam.clients.darksky :as ds]
+            [balaam.clients.github :as gh]
+            [balaam.clients.google :as google]
             [balaam.postgres :as db]
             [cheshire.core :refer :all]
             [clojure.core.reducers :as r]
@@ -126,3 +128,41 @@
 
 (defn github [user args]
   (if (status-check? args) (status-check user args) (no-status-check user args)))
+
+(defn- fmt-weather [xs]
+  (let [content (first xs)
+        weather (last xs)]
+    (cond
+      (true? (text? content)) 
+        (if (nil? (:locale weather))
+          (format "%s %s" (:temperature weather) (:icon weather))
+          (format "%s %s %s" (:locale weather)
+                             (:temperature weather)
+                             (:icon weather)))
+      :else {:status 200 :body weather})))
+
+(defn- get-fresh-weather [wifis]
+  (let [location (google/location wifis)]
+    (ds/weather location)))
+
+(defn- refresh-weather [wifis content uid]
+  (let [weather (get-fresh-weather wifis)
+        _       (db/update-cached-weather uid weather)]
+  [content weather]))
+
+(defn- load-weather [wifis content uid]
+  (let [weather (get-fresh-weather wifis)
+        _       (db/insert-cached-weather uid weather)]
+    [content weather]))
+
+(def refresh-fmt-weather (comp fmt-weather refresh-weather))
+(def load-fmt-weather    (comp fmt-weather load-weather))
+(defn weather [user args]
+  (let [content (get (first args) "accept")
+        wifis   (parse-string (:wifis (last args)) true)
+        xs      (db/select-cached-weather (:id user))]
+    (cond
+      (empty? xs)           (load-fmt-weather wifis content (:id user))
+      (true? (expired? xs)) (refresh-fmt-weather wifis content (:id user))
+      :else
+        (fmt-weather [content (:data (first xs))]))))

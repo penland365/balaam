@@ -10,6 +10,7 @@
                  [crypto-password "0.2.0"]
                  [environ "1.1.0"]
                  [org.clojure/core.cache "0.6.5"]
+                 [org.clojure/test.check "0.9.0"]
                  [org.slf4j/slf4j-api "1.7.22"]
                  [org.slf4j/slf4j-simple "1.7.22"]
                  [org.clojure/tools.logging "0.3.1"]
