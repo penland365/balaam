@@ -40,7 +40,4 @@
         now  (parse-currently resp)
         temp (:temperature now)
         icon (get-weather-icon (:icon now))]
-    (log/info "Current Weather --> " now)
-    (log/info "Tempterature -----> " temp)
-    (log/info "Weather Icon -----> " icon) 
-    {:temperature temp :icon icon}))
+    {:temperature temp :icon icon :locale (:locale location)}))

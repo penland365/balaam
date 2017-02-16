@@ -27,9 +27,9 @@
 (def authorize-then-respond (comp tmux/get-slack auth/authorize))
 
 (defroutes app-routes
-  (GET "/data/weather" request (auth/authorize request tmux/get-weather (:headers request) (:params request)))
-  (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
+  (GET "/data/weather" request (auth/authorize request data/weather (:headers request) (:params request)))
   (GET "/data/github" request(auth/authorize request data/github (:headers request) (:params request)))
+  (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
 
   (GET "/users" [] users/index-users)
   (GET "/users/:id" [id] (users/show-user id))

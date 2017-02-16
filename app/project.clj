@@ -10,6 +10,7 @@
                  [crypto-password "0.2.0"]
                  [environ "1.1.0"]
                  [org.clojure/core.cache "0.6.5"]
+                 [org.clojure/test.check "0.9.0"]
                  [org.slf4j/slf4j-api "1.7.22"]
                  [org.slf4j/slf4j-simple "1.7.22"]
                  [org.clojure/tools.logging "0.3.1"]
@@ -17,7 +18,8 @@
                  [ring/ring-json "0.4.0"]
                  [ring.middleware.logger "0.5.0"]
                  [slingshot "0.12.2"]]
-  :plugins [[lein-ring "0.9.7"]]
+  :plugins [[lein-codox "0.10.3"]
+            [lein-ring "0.9.7"]]
   :ring {:handler balaam.handler/app}
   :profiles { :dev { :dependencies [[javax.servlet/servlet-api "2.5"]
                                          [ring/ring-mock "0.3.0"]]}})
