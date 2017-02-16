@@ -1,5 +1,12 @@
 balaam - Managing your TMUX status bar.
 ====
+
+## Badges
+[![PyPI](https://img.shields.io/pypi/l/Django.svg?style=plastic)]()
+[![CircleCI branch](https://img.shields.io/circleci/project/penland365/balaam/master.svg?style=plastic)](https://circleci.com/gh/penland365/balaam/tree/master)
+
+
+## Overview
 ![TMUX Status Bar](https://raw.githubusercontent.com/penland365/balaam/docs/images/status-bar.png)
 
 ![Weather Status](https://raw.githubusercontent.com/penland365/balaam/docs/images/right-status.png)
