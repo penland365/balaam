@@ -4,6 +4,11 @@
   (:import  [java.security SecureRandom]
             [java.util Base64]))
 
+(defn in?
+  "true if coll contains elem"
+  [coll elem]
+  (some #(= elem %) coll))
+
 (defn salt [num-bytes]
   "Returns a secure ( yet still pseudo ) Random Salt. Note that the length of the Base64 encoded 
   salt may differ from the length passed in, which determines the number of random bytes chosen."

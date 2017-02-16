@@ -17,7 +17,8 @@
                  [ring/ring-json "0.4.0"]
                  [ring.middleware.logger "0.5.0"]
                  [slingshot "0.12.2"]]
-  :plugins [[lein-ring "0.9.7"]]
+  :plugins [[lein-codox "0.10.3"]
+            [lein-ring "0.9.7"]]
   :ring {:handler balaam.handler/app}
   :profiles { :dev { :dependencies [[javax.servlet/servlet-api "2.5"]
                                          [ring/ring-mock "0.3.0"]]}})

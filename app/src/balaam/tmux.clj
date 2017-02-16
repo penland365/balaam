@@ -18,7 +18,12 @@
   (let [content (first xs)
         weather (last xs)]
     (cond
-      (true? (text? content)) (format "%s %s" (:temperature weather) (:icon weather))
+      (true? (text? content)) 
+        (if (nil? (:locale weather))
+          (format "%s %s" (:temperature weather) (:icon weather))
+          (format "%s %s %s" (:locale weather)
+                             (:temperature weather)
+                             (:icon weather)))
       :else {:status 200 :body weather})))
 
 (defn- expired? [results]
@@ -26,7 +31,8 @@
         last-modified (.toInstant (:last_modified_at x))
         expires-at    (.plusSeconds last-modified (:seconds_to_cache x))
         now           (Instant/now)]
-    (.isAfter now expires-at)))
+    true))
+    ;;(.isAfter now expires-at)))
 
 (defn- get-fresh-weather [wifis]
   (let [location (google/location wifis)]
