@@ -39,6 +39,7 @@
 
   (GET "/tokens/slack" request (auth/authorize request tk/idx-slack-tokens))
   (GET "/tokens/slack/:id" {:keys [headers id] :as request} (auth/authorize request tk/show-slack-token (:id (:route-params request))))
+  (DELETE "/tokens/slack/:id" {:keys [headers id] :as request} (auth/authorize request tk/destroy-slack-token (:id (:route-params request))))
 
   (GET "/redirects/slack" request (slack/redirect (get request :params)))
   (GET "/:username/slack/auth"  {:keys [headers username] :as request}

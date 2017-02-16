@@ -22,3 +22,13 @@
                                          :url "https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html"}}
       (empty? result) {:status 404}
       :else {:status 200 :body (rename-inserted-at (first result))})))
+
+(defn destroy-slack-token [user args]
+  "Destroy Slack token with provided id"
+  (let [result (db/delete-slack-token-by-id-uid (:id user) (first args))
+        error? (instance? Throwable result)]
+    (cond
+      (true? error?) {:status 400 :body {:postgresql_error_code (.getCode result)
+                                         :url "https://www.postgresql.org/docs/9.6/static/errcodes-appendix.html"}}
+      (not= (:updated result) 1) {:status 404}
+      :else {:status 204})))

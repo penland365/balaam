@@ -70,6 +70,11 @@
                     FROM balaam.slack_tokens
                     WHERE user_id = $1;" uid])))
 
+(defn delete-slack-token-by-id-uid [id uid]
+  "Delete Slack token with ID and user_id"
+  (<!! (execute! db ["DELETE FROM balaam.slack_tokens
+                    WHERE id = $1 AND user_id = $2;" id uid])))
+
 (defn select-slack-token-by-id-uid [id uid]
   "Token information to be shown to the user" 
   (<!! (query! db ["SELECT id, access_token, scope, slack_user_id, slack_team_name,
