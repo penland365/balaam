@@ -58,7 +58,29 @@
                                                    :slack_team_id   (:team_id slack)})))
 
 (defn select-slack-tokens-by-user-id [user-id]
-  (<!! (query! db ["SELECT id, user_id, access_token, scope, slack_user_id, slack_team_name, slack_team_id FROM balaam.slack_tokens WHERE user_id = $1" user-id])))
+  (<!! (query! db ["SELECT id, user_id, access_token, scope, slack_user_id, slack_team_name, 
+                    slack_team_id
+                    FROM balaam.slack_tokens 
+                    WHERE user_id = $1;" user-id])))
+
+(defn select-slack-tokens-by-uid [uid]
+  "Token information to be shown to the user" 
+  (<!! (query! db ["SELECT id, access_token, scope, slack_user_id, slack_team_name,
+                      slack_team_id, last_modified_at, inserted_at
+                    FROM balaam.slack_tokens
+                    WHERE user_id = $1;" uid])))
+
+(defn delete-slack-token-by-id-uid [id uid]
+  "Delete Slack token with ID and user_id"
+  (<!! (execute! db ["DELETE FROM balaam.slack_tokens
+                    WHERE id = $1 AND user_id = $2;" id uid])))
+
+(defn select-slack-token-by-id-uid [id uid]
+  "Token information to be shown to the user" 
+  (<!! (query! db ["SELECT id, access_token, scope, slack_user_id, slack_team_name,
+                      slack_team_id, last_modified_at, inserted_at
+                    FROM balaam.slack_tokens
+                    WHERE id = $1 AND user_id = $2;" id uid])))
 
 (defn select-cached-weather [uid]
   (<!! (query! db ["SELECT id, user_id, datum_type::text, seconds_to_cache, data, last_modified_at FROM balaam.cached_data WHERE user_id = $1 AND datum_type = 'WEATHER';" uid])))
