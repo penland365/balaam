@@ -7,7 +7,6 @@
             [ring.middleware.defaults :refer [wrap-defaults api-defaults]]
             [clojure.string :as str]
             [balaam.resources.tokens :as tk]
-            [balaam.tmux :as tmux]
             [balaam.postgres :as db]
             [balaam.clients.slack :as slack]
             [balaam.resources.data :as data]
@@ -25,12 +24,10 @@
 (defn namespace-then-auth [request handler]
   (auth/user-namespace-exists? request auth/namespace-auth handler))
 
-(def authorize-then-respond (comp tmux/get-slack auth/authorize))
-
 (defroutes app-routes
   (GET "/data/weather" request (auth/authorize request data/weather (:headers request) (:params request)))
   (GET "/data/github" request(auth/authorize request data/github (:headers request) (:params request)))
-  (GET "/data/slack" request (auth/authorize request tmux/get-slack (:headers request))) 
+  (GET "/data/slack" request (auth/authorize request data/show-slack (:headers request)))
 
   (GET "/users" [] users/index-users)
   (GET "/users/:id" [id] (users/show-user id))

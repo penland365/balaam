@@ -1,6 +1,7 @@
 (ns balaam.postgres
   (:require [clojure.core.async :refer [<!! go]]
             [environ.core :refer [env]]
+            [clojure.tools.logging :as log]
             [postgres.async :refer :all]
             [postgres.async.json])
   (:gen-class))

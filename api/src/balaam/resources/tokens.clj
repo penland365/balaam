@@ -25,7 +25,7 @@
 
 (defn destroy-slack-token [user args]
   "Destroy Slack token with provided id"
-  (let [result (db/delete-slack-token-by-id-uid (:id user) (first args))
+  (let [result (db/delete-slack-token-by-id-uid (first args) (:id user))
         error? (instance? Throwable result)]
     (cond
       (true? error?) {:status 400 :body {:postgresql_error_code (.getCode result)

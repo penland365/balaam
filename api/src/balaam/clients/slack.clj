@@ -15,7 +15,7 @@
 (def redirect-uri
   (env :slack-redirect-uri))
 (def scopes
-  "identify,channels:history,channels:read")
+  "identify,channels:history,channels:read,groups:read")
 
 (defn- auth-req-params [user-id]
   [
@@ -88,7 +88,7 @@
                   :else 
                     (redirect-error-html (:id db-user)))))))))
 
-(defn- list-channels [token]
+(defn list-channels [token]
   (let [params   (list {:k "token" :v token} {:k "exclude_archived" :v true })
         endpoint (build-endpoint params "https://slack.com/api/channels.list")
         resp     (client/get endpoint)]
@@ -97,17 +97,33 @@
 (defn- find-gen [channels]
   (first (filter #(= "share" (:name %)) channels)))
 
-(defn- channel-info [token channel]
+(defn channel-info [token channel]
   (let [params   (list {:k "token" :v token} { :k "channel" :v channel })
         endpoint (build-endpoint params "https://slack.com/api/channels.info")
         resp     (client/get endpoint)]
     (:channel (parse-string (:body resp) true))))
 
-(defn- channel-history [token channel ts]
+(defn channel-history [token channel ts]
   (let [params   (list {:k "token" :v token} {:k "channel" :v channel} {:k "oldest" :v ts} {:k "inclusive" :v false})
         endpoint (build-endpoint params "https://slack.com/api/channels.history")
         resp     (client/get endpoint)]
     (parse-string (:body resp) true)))
+
+(defn chan-history [token channel ts]
+  "This method returns a portion of message events from the specified channel. 
+   To read the entire history for a channel, call the method with no latest or
+   oldest arguments, and then continue paging using the instructions below. To 
+   retrieve a single message, specify its ts value as latest, set inclusive to
+   true, and dial your count down to 1. See https://api.slack.com/methods/channels.history
+   for more information"
+  (let [response (client/get "https://slack.com/api/channels.history" 
+                             {:accept  :json
+                              :content :json 
+                              :query-params {:token     token
+                                             :channel   channel
+                                             :inclusive false
+                                             :oldest    ts}})]
+    (:messages (parse-string (:body response) true))))
 
 (defrecord MU [message predicate])
 
@@ -154,6 +170,42 @@
         xs               (map #(:info %) unread_channels)]
     xs))
 
+(defn list-groups [token]
+  "This method returns a list of private channels in the team that the caller is 
+   in and archived groups that the caller was in. The list of (non-deactivated) 
+   members in each private channel is also returned. 
+   See https://api.slack.com/methods/groups.list for more information"
+  (let [response (client/get "https://slack.com/api/groups.list" 
+                             {:accept  :json
+                              :content :json 
+                              :query-params {:token token
+                                             :exclude_archived true}})]
+    (:groups (parse-string (:body response) true))))
+
+(defn group-info [token id]
+  "This method returns information about a private channel.
+   See https://api.slack.com/methods/groups.info for more information"
+  (let [response (client/get "https://slack.com/api/groups.info"
+                             {:accept  :json
+                              :content :json
+                              :query-params {:token   token
+                                             :channel id}})]
+    (:group (parse-string (:body response) true))))
+
+(defn group-history [token channel ts]
+  "This method returns a portion of messages/events from the specified private channel.
+   To read the entire history for a private channel, call the method with no latest or 
+   oldest arguments, and then continue paging using the instructions below.
+   See https://api.slack.com/methods/groups.history for more information."
+  (let [response (client/get "https://slack.com/api/channels.history"
+                             {:accept  :json
+                              :content :json
+                              :query-params {:token     token
+                                             :channel   channel
+                                             :oldest    ts
+                                             :inclusive false}})]
+    (:messages (parse-string (:body response) true))))
+
 (defn- sum-unread [channels]
   (let [xs (map #(:unread_count_display %) channels)]
     (reduce + xs)))
@@ -177,11 +229,13 @@
   "Gets all relevent data per room."
   (let [stoken           (:access_token record)
         suid             (:slack_user_id record)
-        channels         (list-channels stoken)
-        unread-chans     (unread-channels channels stoken)
-        unread-msg-count (sum-unread unread-chans)
-        notifications    (sum-notifications unread-chans stoken suid)]
-    {:mentions notifications :unread unread-msg-count}))
+        groups           (list-groups stoken)]
+        ;;channels         (list-channels stoken)
+        ;;unread-chans     (unread-channels channels stoken)
+        ;;unread-msg-count (sum-unread unread-chans)
+        ;;notifications    (sum-notifications unread-chans stoken suid)]
+    ;;{:mentions notifications :unread unread-msg-count}))
+    {:mentions "lol" :unread "lolnothingmatters"}))
 
 (defn- slack+ [x y]
   "A function to be folded into a list of slack records"
