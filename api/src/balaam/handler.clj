@@ -19,7 +19,7 @@
            [java.util Base64]))
 
 (defn- test-route [request]
-  (log/info request)
+  (log/debug request)
   {:status 201})
 
 (defn namespace-then-auth [request handler]

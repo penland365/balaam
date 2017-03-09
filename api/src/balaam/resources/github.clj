@@ -31,8 +31,6 @@
         (let [encoded-state (URLEncoder/encode state "UTF-8")
               params        (conj base-auth-params {:k "state" :v encoded-state})
               url    (u/build-endpoint params auth-url)]
-          (log/info "Original State --> " state)
-          (log/info "Encoded STate -->  " encoded-state)
           {:status 200 :body {:url url}}))))
 
 (defn- redirect-error-html []

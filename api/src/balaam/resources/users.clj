@@ -12,7 +12,6 @@
 
 (defn show-user [id]
   "Shows a user with an id or username"
-  (log/info id)
   (if (number? id)
     (let [results (db/select-external-user-by-id id)
           error?  (instance? Throwable results)]
@@ -33,7 +32,6 @@
 (def short-passwd-resp {:status 400 :body {:reason "Password must be at least 6 characters"}})
 
 (defn post-user [user]
-  (log/info user)
   (let [password        (get user "password")]
     (if (short-passwd? password)
       (short-passwd-resp)

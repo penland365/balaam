@@ -114,7 +114,7 @@
 (defn- cont [mu]
   (let [x (.contains (:message mu) (:predicate mu))]
     (cond
-      (true? x) (log/info (:message mu)))
+      (true? x) (log/debug (:message mu)))
      x))
 
 (defn- count-mentions [messages user-id]

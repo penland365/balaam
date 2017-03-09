@@ -58,26 +58,23 @@
     (:state (last ys))))
 
 (defn- load-github [uid content]
-  (log/warn "Loading new set of Github Notifications")
+  (log/debug "Loading new set of Github Notifications")
   (let [data (get-github-notifications uid content)
         _    (db/insert-cached-github uid (:data data))]
     data))
 
 (defn- refresh-github [uid content]
-  (log/warn "Refreshing Github Notifications")
+  (log/debug "Refreshing Github Notifications")
   (let [data (get-github-notifications uid content)
         _    (db/update-cached-github uid (:data data))]
     data))
 
 (defn- refresh-github-status [uid content xs]
-  (log/warn "Refreshing Github Notifications and Status")
+  (log/debug "Refreshing Github Notifications and Status")
   (let [data   (get-github-notifications uid content)
         status (get-ref-status uid (:owner xs) (:repo xs) (:ref xs))
         ys     (assoc-in data [:data :state] status)
         _      (db/update-cached-github uid (:data ys))]
-    (log/info data)
-    (log/info ys)
-    (log/info status)
     ys))
 
 (def load-and-format-github    (comp format-github-response load-github))
@@ -173,7 +170,6 @@
   (let [content (get (first args) "accept")
         xs      (db/select-cached-weather (:id user))]
     "If the cached weather is valid, just return it"
-    (log/info "valid-cache? " (valid-cache? xs))
     (if (valid-cache? xs)
       (fmt-weather [content (:data (first xs))])
       (let [location (determine-location (last args))

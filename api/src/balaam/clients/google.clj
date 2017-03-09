@@ -67,7 +67,6 @@
 (defrecord Location [lat lng locale])
 
 (defn location [wifis]
-  (log/info "GETTING LOCATION")
   (let [xs     (doall (map ap wifis))
         req    (request xs)
         resp   (post-location req)
@@ -77,7 +76,6 @@
     (Location. (:lat loc) (:lng loc) locale)))
 
 (defn get-locale [lat lng]
-  (log/info "GETTING LOCALE")
   (let [resp (reverse-geocode lat lng)
         json (parse-string (:body resp) true)
         locale (parse-locality json)]
