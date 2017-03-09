@@ -155,14 +155,31 @@
         _       (db/insert-cached-weather uid weather)]
     [content weather]))
 
-(def refresh-fmt-weather (comp fmt-weather refresh-weather))
-(def load-fmt-weather    (comp fmt-weather load-weather))
+(defn- valid-cache? [xs]
+  "Determine if the cached weather is still valid - 1. Do we have any weather?
+                                                    2. If we have weather, has it expired yet?"
+  (and (not (empty? xs)) (not (expired? xs))))
+
+(defn- determine-location [args]
+  (let [wifis (:wifis args)
+        lat   (:latitude args)
+        lng   (:longitude args)]
+    "Lat and Lng take precdence of WIFIS, as we assume the user knows more."
+    (if (and (not (nil? lat)) (not (nil? lng)))
+      (google/get-locale lat lng)
+      (google/location wifis))))
+
 (defn weather [user args]
   (let [content (get (first args) "accept")
-        wifis   (parse-string (:wifis (last args)) true)
         xs      (db/select-cached-weather (:id user))]
-    (cond
-      (empty? xs)           (load-fmt-weather wifis content (:id user))
-      (true? (expired? xs)) (refresh-fmt-weather wifis content (:id user))
-      :else
-        (fmt-weather [content (:data (first xs))]))))
+    "If the cached weather is valid, just return it"
+    (log/info "valid-cache? " (valid-cache? xs))
+    (if (valid-cache? xs)
+      (fmt-weather [content (:data (first xs))])
+      (let [location (determine-location (last args))
+            weather  (ds/weather location)]
+        "If the cache was empty, we are inserting weather for the first time"
+        (if (empty? xs)
+          (db/insert-cached-weather (:id user) weather)
+          (db/update-cached-weather (:id user) weather))
+        (fmt-weather [content weather])))))

@@ -28,11 +28,12 @@
         :else {:status 200 :body (first results)}))))
 
 (defn- short-passwd? [pword]
-  (< (count pword) 7))
+  (< (count pword) 6))
 
-(def short-passwd-resp {:status 400 :body {:reason "Password must be at least 7 characters"}})
+(def short-passwd-resp {:status 400 :body {:reason "Password must be at least 6 characters"}})
 
 (defn post-user [user]
+  (log/info user)
   (let [password        (get user "password")]
     (if (short-passwd? password)
       (short-passwd-resp)
