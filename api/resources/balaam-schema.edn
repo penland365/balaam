@@ -1,0 +1,16 @@
+{:enums
+ {:datum
+  {:description "Datum available for TMUX"
+   :values ["GITHUB" "SLACK" "WEATHER"]}}
+
+ :objects
+ {:user
+  {:fields {:id {:type Int}
+            :username {:type String}}}}
+
+ :queries
+ {:viewer {:type (non-null :user)
+           :args {:id {:type Int}}
+           :resolve :resolve-viewer}
+  :users {:type (non-null (list :user))
+          :resolve :resolve-users}}}

@@ -10,6 +10,7 @@
             [balaam.tmux :as tmux]
             [balaam.postgres :as db]
             [balaam.clients.slack :as slack]
+            [balaam.graphql.handler :refer [get-graphql post-graphql]]
             [balaam.resources.data :as data]
             [balaam.resources.github :as gh]
             [balaam.resources.users :as users]
@@ -49,6 +50,8 @@
   (GET "/:username/github/auth" {:keys [headers username] :as request}
        (namespace-then-auth request gh/get-auth))
 
+  (GET  "/graphql" request (get-graphql request))
+  (POST "/graphql" request (post-graphql request))
   (route/not-found "Not Found"))
 
 (def app
