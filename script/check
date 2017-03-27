@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+echo "Checking balaam dependencies for $(uname) $(uname -r)" 
+
+OPERATING_SYSTEM=$(uname)
+
+# Docker
+checkForDocker() {
+    command -v docker > /dev/null 2>&1
+    if [ $? = 0 ];
+    then
+        echo "Docker ... found"
+    else
+        echo "Docker ... NOT FOUND"
+        exit 1;
+    fi
+}
+echo ""
+echo "Checking Docker"
+if [ "$OPERATING_SYSTEM" == "Linux" ];
+    then
+        checkForDocker
+    elif [ "$OPERATING_SYSTEM" == "Darwin" ];
+    then
+        command -v docker-machine > /dev/null 2>&1
+        if [ $? = 0 ];
+        then
+            echo "Docker Machine ... found"
+        else
+            echo "Docker Machine ... NOT FOUND"
+            exit 1;
+        fi
+        checkForDocker
+    else
+        echo "Cannot check dependencies for unknown operating system $(uname)"
+        exit 1;
+fi
+
+# API Dependencies
+echo ""
+echo "Checking Balaam API"
+command -v javac > /dev/null 2>&1 
+if [ $? = 0 ];
+    then 
+      echo "Java Compiler ... found"
+    else 
+      echo "Java Compiler ... NOT FOUND."
+      exit 1;
+fi
+command -v lein > /dev/null 2>&1
+if [ $? = 0 ];
+    then
+        echo "Leiningen ....... found"
+    else
+        echo "Leiningen ....... NOT FOUND"
+        exit 1;
+fi
+
+exit 0 
