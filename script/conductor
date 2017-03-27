@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+CONDUCTOR_VERSION=0.1.0-SNAPSHOT
+JAR=conductor-$CONDUCTOR_VERSION-standalone.jar
+
+if [[ ! -f $JAR ]]; 
+then
+    echo "Conductor fat jar $JAR not found."
+    exit 1;
+else
+    java -jar $JAR
+fi
