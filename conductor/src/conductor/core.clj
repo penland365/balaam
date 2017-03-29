@@ -2,6 +2,7 @@
   (:require [clojure.data.json :as json]
             [clojure.tools.cli :refer [parse-opts]]
             [clojure.string :as str]
+            [conductor.modules :as mods]
             [conductor.db :as db]
             [conductor.docker :as docker])
   (:gen-class))
@@ -63,7 +64,7 @@
     (if exit-message
       (exit (if ok? 0 1) exit-message))
       (case action
-        "db" (db/run-db! options)
-        "api" (prn "It's an API!")
+        "db"  (db/run-db! options)
+        "api" (mods/run-api! options)
         "backend" (prn "It's a backend!"))
-    (Thread/sleep 30000)))
+    (Thread/sleep Long/MAX_VALUE)))

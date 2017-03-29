@@ -39,7 +39,9 @@
   (let [resp @(http/post (build-url (api-version) "/containers/create") 
                          {:headers {"Content-Type" "application/json"
                                     "Accept"       "application/json"}
-                          :body body})]
+                          :body body
+                          :debug true})]
+    (log/info resp)
     (when (not= (:status resp) 201)
       (prn resp))
       ;;(die (str "Error creating Container " body ", HTTP status " (:status resp))))

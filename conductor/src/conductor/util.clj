@@ -10,7 +10,7 @@
   (let [out-chan (async/chan)]
     (async/thread (docker/stream-logs! id out-chan))
     (async/go-loop [current-read-bytes []]
-                   (let [[v port] (async/alts! [out-chan (async/timeout 5000)])]
+                   (let [[v port] (async/alts! [out-chan (async/timeout 500)])]
                      (if (= port out-chan)
                        (recur (conj current-read-bytes v))
                        (do
