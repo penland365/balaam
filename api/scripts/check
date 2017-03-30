@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+set -e
+
+# colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+# API Dependencies
+echo "Checking Balaam API dependencies"
+command -v javac > /dev/null 2>&1 
+if [ $? = 0 ];
+    then 
+      printf "Java Compiler ... ${GREEN}FOUND${NO_COLOR}\n"
+    else 
+      printf "Java Compiler ... ${RED}NOT FOUND${NO_COLOR}\n"
+      exit 1;
+fi
+command -v lein > /dev/null 2>&1
+if [ $? = 0 ];
+    then
+        printf "Leiningen ....... ${GREEN}FOUND${NO_COLOR}\n"
+    else
+        printf "Leiningen ....... ${RED}NOT FOUND${NO_COLOR}\n"
+        exit 1;
+fi
+
+exit 0 

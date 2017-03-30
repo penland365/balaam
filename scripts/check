@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 
-echo "Checking balaam dependencies for $(uname) $(uname -r)" 
+set -e
+
+# colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+printf "${GREEN}Checking balaam dependencies for $(uname) $(uname -r)${NO_COLOR}\n\n"
 
 OPERATING_SYSTEM=$(uname)
 
@@ -9,13 +16,13 @@ checkForDocker() {
     command -v docker > /dev/null 2>&1
     if [[ $? = 0 ]];
     then
-        echo "Docker ... found"
+        printf "Docker ... ${GREEN}FOUND${NO_COLOR}\n"
     else
-        echo "Docker ... NOT FOUND"
+        printf "Docker ... ${RED}NOT FOUND${NO_COLOR}\n"
         exit 1;
     fi
 }
-echo ""
+
 echo "Checking Docker"
 if [[ "$OPERATING_SYSTEM" == "Linux" ]];
     then
@@ -25,17 +32,17 @@ if [[ "$OPERATING_SYSTEM" == "Linux" ]];
         command -v docker-machine > /dev/null 2>&1
         if [ $? = 0 ];
         then
-            echo "Docker Machine ... found"
+            printf "Docker Machine ... ${GREEN}FOUND${NO_COLOR}\n"
         else
-            echo "Docker Machine ... NOT FOUND"
+            printf "Docker Machine ... ${RED}NOT FOUND${NO_COLOR}\n"
             exit 1;
         fi
         checkForDocker
     else
-        echo "Cannot check dependencies for unknown operating system $(uname)"
+        printf "${RED}Cannot check dependencies for unknown operating system $(uname)${NO_COLOR}\n"
         exit 1;
 fi
 echo ""
 
 # API
-bash ./api/script/check
+bash ./api/scripts/check
