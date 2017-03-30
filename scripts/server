@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Start Condocutor with defaults
+
+./scripts/conductor backend

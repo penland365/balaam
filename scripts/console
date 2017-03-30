@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -e
+
+# Start Clojure Leiningen conole
+
+cd api/ && lein repl
