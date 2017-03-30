@@ -1,12 +1,23 @@
 (ns conductor.modules
   (:require [clojure.data.json :as json]
             [clojure.tools.cli :refer [parse-opts]]
+            [environ.core :refer [env]]
             [clojure.tools.logging :as log]
             [conductor.docker :as docker]
             [conductor.util :as util])
   (:gen-class))
 
-(def api-container-name "penland365/balaam")
+(def api-container-name  "penland365/balaam")
+(def api-http-port       (env :api-http-port))
+(def google-api-key      (env :google-api-key))
+(def darksky-api-key     (env :darksky-api-key))
+(def slack-client-id     (env :slack-client-id))
+(def slack-client-secret (env :slack-client-secret))
+(def slack-redirect-uri  (env :slack-redirect-uri))
+(def database            (env :database))
+(def database-port       (env :database-port))
+(def database-username   (env :database-username))
+(def database-password   (env :database-password))
 
 (defn- present-container? [containers version nm]
   "Checks to see if a container is present on the docker machine. 
@@ -33,31 +44,30 @@
         (docker/stop (get container "Id"))
         (docker/rm   (get container "Id"))))))
 
-(def api-http-port "8080")
-
-(def api-env
-  ["HTTP_PORT=8080"
-   "GOOGLE_API_KEY=AIzaSyADzpGbV67hYNHv2ReFFVuRywqzcznX9K0"
-   "DARKSKY_API_KEY=061b1c75227f26d05a389965d4e3cf14" 
-   "DATABASE_HOSTNAME=172.17.0.1" 
-   "DATABASE_PORT=4501" 
-   "DATABASE_USERNAME=moses" 
-   "DATABASE_PASSWORD=buniversity1" 
-   "DATABASE=balaam" 
-   "SLACK_CLIENT_ID=2457831732.139175926980" 
-   "SLACK_CLIENT_SECRET=fc3b83d8be1fa65d2f95fdcbaf30033d"
-   "SLACK_REDIRECT_URI=http://104.198.135.229/redirects/slack"])
+(def api-env [
+               (str "HTTP_PORT=" api-http-port)
+               (str "GOOGLE_API_KEY=" google-api-key)
+               (str "DARKSKY_API_KEY=" darksky-api-key)
+               "DATABASE_HOSTNAME=172.17.0.1" 
+               (str "DATABASE_PORT=" database-port)
+               (str "DATABASE_USERNAME=" database-username)
+               (str "DATABASE_PASSWORD=" database-password)
+               (str "DATABASE=" database)
+               (str "SLACK_CLIENT_ID=" slack-client-id)
+               (str "SLACK_CLIENT_SECRET=" slack-client-secret)
+               (str "SLACK_REDIRECT_URI=" slack-redirect-uri)])
 
 (defn- api-container-body [api-version]
+  (log/info "THE api-http-port IS " api-http-port)
   (json/write-str {:Env api-env
                    :ExposedPorts {
-                     "8080/tcp" {}
+                     (str api-http-port "/tcp") {}
                    }
                    :HostConfig { 
                      :PortBindings { 
-                       "8080/tcp" [
+                       (str api-http-port "/tcp") [
                          {
-                           :HostPort "4500"
+                           :HostPort api-http-port 
                            :HostIp   ""
                          }
                        ]

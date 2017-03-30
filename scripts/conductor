@@ -18,4 +18,4 @@ then
     printf "${GREEN}conductor built! Starting now . . .\n${NO_COLOR}"
 fi
 
-java -Xfuture -Xms256m -client -jar "scripts/"$JAR "$@"
+source ./scripts/.env && java -Xfuture -Xms256m -client -jar "scripts/"$JAR "$@"
