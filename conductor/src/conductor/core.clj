@@ -64,7 +64,9 @@
     (if exit-message
       (exit (if ok? 0 1) exit-message))
       (case action
-        "db"  (db/run-db! options)
-        "api" (mods/run-api! options)
-        "backend" (prn "It's a backend!"))
-    (Thread/sleep Long/MAX_VALUE)))
+        "db"      (db/run-db! options)
+        "api"     (mods/run-api! options)
+        "backend" 
+        (let [f-db (future (db/run-db! options))
+              f-api (future (mods/run-api! options))]
+          (Thread/sleep Long/MAX_VALUE)))))

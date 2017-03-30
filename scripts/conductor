@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -e
+
+CONDUCTOR_VERSION=0.1.0-SNAPSHOT
+JAR=conductor-$CONDUCTOR_VERSION-standalone.jar
+
+# colors
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NO_COLOR='\033[0m'
+
+if [[ ! -f "scripts/"$JAR ]]; 
+then
+    printf "${RED}conductor jar not found, building . . .\n${NO_COLOR}"
+    (cd conductor/ && lein do clean, deps, check, test, uberjar)
+    cp conductor/target/uberjar/$JAR scripts/
+    printf "${GREEN}conductor built! Starting now . . .\n${NO_COLOR}"
+fi
+
+java -Xfuture -Xms256m -client -jar "scripts/"$JAR "$@"
