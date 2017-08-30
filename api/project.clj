@@ -20,6 +20,8 @@
                  [slingshot "0.12.2"]]
   :plugins [[lein-codox "0.10.3"]
             [lein-ring "0.9.7"]]
-  :ring {:handler balaam.handler/app}
+  :ring {:handler balaam.handler/app
+         :nrepl {:start? true
+                 :port   10071}}
   :profiles { :dev { :dependencies [[javax.servlet/servlet-api "2.5"]
                                          [ring/ring-mock "0.3.0"]]}})
