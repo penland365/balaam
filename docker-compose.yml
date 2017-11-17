@@ -1,0 +1,25 @@
+version: '3.2'
+
+services:
+  #convo:
+  #  container_name: convo
+  #  image: novolabs/convo-svc:v0.0.6
+  #  environment:
+  #  - CONVO_HOST=0.0.0.0
+  #  - CONVO_PORT=5000
+  #  - ADMIN_PORT=5001
+  #  - DB_HOST=db
+  #  - DB_PORT=5432
+  #  - DB_NAME=novolabs
+  #  - DB_USER=docker
+  #  - DB_PASSWD=opensesame
+  #  - LOG_LEVEL=DEBUG
+  #  - GOOGLE_SPEECH_API_KEY=AIzaSyD5YbvJXcs1UeQjfrWQyS8BvuIqxj5z9dM
+  #  ports:
+  #  - "5000:5000"
+  #  - "5001:5001"
+  db:
+    container_name: balaam-db
+    image: penland365/balaam-db:latest
+    ports:
+    - "5432:5432"
