@@ -56,7 +56,7 @@ object DarkSky extends Logging {
   }
 
   def buildRequest(latLong: WeatherRequest): Request = RequestBuilder()
-    .setHeader(HttpHeaders.Names.USER_AGENT, "balaam/v0.0.1-M1")
+    .setHeader(HttpHeaders.Names.USER_AGENT, "balaam/v0.3.0-M2")
     .setHeader(HttpHeaders.Names.ACCEPT, "application/json")
     .url(buildForecastUrl(apiKey, latLong))
     .buildGet()

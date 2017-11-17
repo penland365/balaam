@@ -16,4 +16,10 @@ object errors {
     extends DarkSkyError(s"ERROR - HTTP 404 for resource ${request.uri}")
   final case class DarkSkyJsonDecodingFailure(error: Error, json: String)
     extends DarkSkyError(s"ERROR - Could not JSON Decode DarkSky HTTP 200, Error[$error], JSON[$json].")
+
+  sealed abstract class GithubError(message: String) extends RuntimeException(message)
+  final case class UnknownGithubResponse(response: Response)
+    extends GithubError(s"ERROR - Unknown HTTP Response Code [${response.status}]")
+  final case class GithubJsonDecodingFailure(error: Error, json: String)
+    extends GithubError(s"ERROR - Could not JSON Deocde Github HTTP 200, Error[$error], JSON[$json].")
 }

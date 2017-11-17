@@ -4,6 +4,8 @@ package balaam
 import codes.penland365.balaam.clients.DarkSky
 import codes.penland365.balaam.domain._
 import com.twitter.finagle.Service
+import codes.penland365.balaam.clients.Github
+import codes.penland365.balaam.clients.Github.Notification
 import com.twitter.storehaus.cache.MutableTTLCache
 import com.twitter.util.logging.Logging
 import com.twitter.util.{Duration, Future}
@@ -29,6 +31,21 @@ object services extends Logging {
       val temp = forecast.currently.apparentTemperature.getOrElse(-459.67)
       val icon = forecast.currently.emojiForIcon
       new Weather(temp, icon)
+    }
+  }
+
+  val ListNotifications: Service[String, List[Notification]] = new Service[String, List[Notification]] {
+    private val cache = MutableTTLCache[String, List[Notification]](Duration.fromSeconds(60), 7)
+
+    override def apply(request: String): Future[List[Notification]] = cache.get(request) match {
+      case Some(x) => Future.value(x)
+      case None    => {
+        debug(s"Fetching new Github Notifications")
+        Github.GetNotifications(request) map { notifications =>
+          cache += ((request, notifications))
+          notifications
+        }
+      }
     }
   }
 }
