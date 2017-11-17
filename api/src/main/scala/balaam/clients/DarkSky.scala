@@ -4,23 +4,23 @@ package balaam.clients
 import codes.penland365.balaam.domain.LatLong
 import codes.penland365.balaam.errors.{BadDarkSkyRequest, DarkSkyJsonDecodingFailure,
   DarkSkyResourceNotFound, InvalidDarkSkyApiKey, UnknownDarkSkyResponse}
+import codes.penland365.balaam.Main
 import com.twitter.finagle.http.{Request, RequestBuilder, Status}
 import com.twitter.finagle.{Addr, Address, Http, Name, Service}
 import com.twitter.io.Buf
-import com.twitter.logging.{Level, Logger}
+import com.twitter.util.logging.Logging
 import com.twitter.util.{Duration, Future, Var}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.parser._
 import io.circe.{Decoder, Encoder}
 import java.net.URL
 import org.jboss.netty.handler.codec.http.HttpHeaders
-import io.circe.parser._
 
-object DarkSky {
-  private val log         = Logger.get("codes.penland365.balaam.clients.DarkSky")
+object DarkSky extends Logging {
   private val host        = "api.darksky.net"
   private val port        = 443
   private val address     = Address(host, port)
-  private lazy val apiKey = ""
+  private lazy val apiKey = Main.darkSkyApiKey()
 
   private val httpClient = Http.client
     .withTls(host)
@@ -36,7 +36,7 @@ object DarkSky {
       httpClient(httpRequest) flatMap { response =>
         response.status match {
           case Status.Ok         => {
-            log(Level.DEBUG, "GET darksky/forecast Response %s", response)
+            trace(s"GET darksky/forecast Response $response")
             val Buf.Utf8(body) = response.content
             decode[Forecast](body) match {
               case Left(error)     => Future.exception(new DarkSkyJsonDecodingFailure(error, body))
@@ -87,7 +87,26 @@ object DarkSky {
     sunriseTime: Option[Long], sunsetTime: Option[Long], temperature: Option[Double], temperatureHigh: Option[Double],
     temperatureHighTime: Option[Long], temperatureLow: Option[Double], temperatureLowTime: Option[Long],
     time: Long, uvIndex: Option[Int], unIndexTime: Option[Long], visibility: Option[Int], windBearing: Option[Int],
-    windGust: Option[Double], windSpeed: Option[Double])
+    windGust: Option[Double], windSpeed: Option[Double]) {
+
+    def emojiForIcon: String = icon match {
+      case Some(x) if x == "clear-day"           => "☀️"
+      case Some(x) if x == "clear-night"         => "🌚"
+      case Some(x) if x == "rain"                => "🌧"
+      case Some(x) if x == "snow"                => "❄️"
+      case Some(x) if x == "sleet"               => "🌨"
+      case Some(x) if x == "wind"                => "💨"
+      case Some(x) if x == "fog"                 => "☁️"
+      case Some(x) if x == "cloudy"              => "☁️"
+      case Some(x) if x == "partly-cloudy-day"   => "⛅"
+      case Some(x) if x == "partly-cloudy-night" => "☁︎"
+      case Some(x)                     => {
+        error(s"Unexpected DarSky ICON string $x")
+        "🎮"
+      }
+      case None                        => "🎮"
+    }
+  }
   object DataPoint {
     implicit val encodeDataPoint: Encoder[DataPoint] = deriveEncoder[DataPoint]
     implicit val decodeDataPoint: Decoder[DataPoint] = deriveDecoder[DataPoint]

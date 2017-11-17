@@ -5,8 +5,11 @@ import com.twitter.finagle.http.{Request, Response}
 import com.twitter.finatra.http.filters.{CommonFilters, LoggingMDCFilter, TraceIdMDCFilter}
 import com.twitter.finatra.http.HttpServer
 import com.twitter.finatra.http.routing.HttpRouter
+import com.twitter.app.Flag
 
-object Main extends BalaamServer
+object Main extends BalaamServer {
+  val darkSkyApiKey: Flag[String] = flag("darksky.api-key", "", "DarkSky Api Key")
+}
 
 class BalaamServer extends HttpServer {
   override val defaultFinatraHttpPort: String = ":8080"

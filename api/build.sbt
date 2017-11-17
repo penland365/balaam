@@ -22,7 +22,7 @@ lazy val compilerOptions = Seq(
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
   "-Ywarn-unused-import",
-//  "-Xfatal-warnings",
+  "-Xfatal-warnings",
   "-Xfuture"
 )
 
@@ -33,6 +33,9 @@ lazy val versions = new {
   val scalatest     = "3.0.4"
   val scalamock     = "3.6.0"
   val finatra       = "2.11.0"
+  val util          = "17.11.0"
+  val storehaus     = "0.15.0"
+  val slf           = "1.7.25"
 }
 
 lazy val testDependencies = Seq(
@@ -48,7 +51,11 @@ libraryDependencies ++= {
     "io.circe"      %%  "circe-parser"      %   versions.circe,
     "com.twitter"   %%  "finagle-stats"     %   versions.finagle,
     "com.twitter"   %%  "finatra-http"      %   versions.finatra,
-    "com.twitter"   %%  "twitter-server"    %   versions.twitterServer
+    "com.twitter"   %%  "twitter-server"    %   versions.twitterServer,
+    "com.twitter"   %%  "util-slf4j-api"    %   versions.util,
+    "com.twitter"   %%  "storehaus-cache"   %   versions.storehaus,
+    "org.slf4j"     %   "slf4j-simple"      %   versions.slf
+
   )
 }
 
@@ -66,21 +73,3 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= testDependencies.map(_ % "test"),
     name := buildName
 )
-
-lazy val generatedDest = "src/generated/scala"
-lazy val genProto = taskKey[Unit]("Generates gRPC files from 'unum/protos/poss.proto'")
-lazy val genConvoProto = taskKey[Unit]("Generates gRPC files from 'unum/protos/convo.proto")
-
-genProto := {
-  s"rm -rf $generatedDest"!
-
-  s"mkdir -p $generatedDest"!
-
-  s"protoc -I ../protos ../protos/poss.proto --io.buoyant.grpc_out=plugins=grpc:$generatedDest"!
-}
-
-genConvoProto := {
-  s"protoc -I ../protos ../protos/convo.proto --io.buoyant.grpc_out=plugins=grpc:$generatedDest"!
-}
-
-unmanagedSourceDirectories in Compile += baseDirectory.value / generatedDest
