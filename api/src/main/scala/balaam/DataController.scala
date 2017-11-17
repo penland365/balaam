@@ -1,16 +1,19 @@
 package codes.penland365
 package balaam
 
-import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
+import com.twitter.finatra.request.RouteParam
 
 final class DataController extends Controller {
+  import DataController.WeatherRequest
 
-  val encoder = domain.EncodeWeather
   prefix("/data") {
-    get("/weather") { request: Request =>
-      val latLong = domain.LatLong(32.7894259,-96.8046665)
-      services.GetWeather(latLong).flatMap(domain.EncodeWeather)
+    get("/weather/:latitude/:longitude") { request: WeatherRequest =>
+      services.GetWeather(request).flatMap(domain.EncodeWeather)
     }
   }
+}
+
+object DataController {
+  case class WeatherRequest(@RouteParam latitude: Double, @RouteParam longitude: Double)
 }

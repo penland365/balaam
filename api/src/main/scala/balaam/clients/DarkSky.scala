@@ -1,11 +1,11 @@
 package codes.penland365
 package balaam.clients
 
-import codes.penland365.balaam.domain.LatLong
 import codes.penland365.balaam.errors.{BadDarkSkyRequest, DarkSkyJsonDecodingFailure,
   DarkSkyResourceNotFound, InvalidDarkSkyApiKey, UnknownDarkSkyResponse}
 import codes.penland365.balaam.Main
 import com.twitter.finagle.http.{Request, RequestBuilder, Status}
+import codes.penland365.balaam.DataController.WeatherRequest
 import com.twitter.finagle.{Addr, Address, Http, Name, Service}
 import com.twitter.io.Buf
 import com.twitter.util.logging.Logging
@@ -30,8 +30,8 @@ object DarkSky extends Logging {
       host
     )
 
-  val GetForecast: Service[LatLong, Forecast] = new Service[LatLong, Forecast] {
-    override def apply(request: LatLong): Future[Forecast] = {
+  val GetForecast: Service[WeatherRequest, Forecast] = new Service[WeatherRequest, Forecast] {
+    override def apply(request: WeatherRequest): Future[Forecast] = {
       val httpRequest = buildRequest(request)
       httpClient(httpRequest) flatMap { response =>
         response.status match {
@@ -55,13 +55,13 @@ object DarkSky extends Logging {
     }
   }
 
-  def buildRequest(latLong: LatLong): Request = RequestBuilder()
+  def buildRequest(latLong: WeatherRequest): Request = RequestBuilder()
     .setHeader(HttpHeaders.Names.USER_AGENT, "balaam/v0.0.1-M1")
     .setHeader(HttpHeaders.Names.ACCEPT, "application/json")
     .url(buildForecastUrl(apiKey, latLong))
     .buildGet()
 
-  private[clients] def buildForecastUrl(apiKey: String, latLong: LatLong): URL =
+  private[clients] def buildForecastUrl(apiKey: String, latLong: WeatherRequest): URL =
     new URL(s"https://api.darksky.net/forecast/$apiKey/${latLong.latitude},${latLong.longitude}?exclude=minutely,hourly,daily,alerts,flags")
 
 
