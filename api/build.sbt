@@ -32,7 +32,7 @@ lazy val versions = new {
   val twitterServer = "1.30.0"
   val scalatest     = "3.0.4"
   val scalamock     = "3.6.0"
-  val finatra       = "3.11.0"
+  val finatra       = "2.11.0"
 }
 
 lazy val testDependencies = Seq(
@@ -43,12 +43,12 @@ lazy val testDependencies = Seq(
 
 libraryDependencies ++= {
   Seq(
-    "io.circe"            %%  "circe-core"      % versions.circe,
-    "io.circe"            %%  "circe-generic"   % versions.circe,
-    "io.circe"            %%  "circe-parser"    % versions.circe,
-    "io.circe"            %%  "circe-java8"     % versions.circe,
-    "com.twitter"         %%  "finagle-stats"   % versions.finagle,
-    "com.twitter"         %%  "twitter-server"  % versions.twitterServer
+    "io.circe"      %%  "circe-core"        %   versions.circe,
+    "io.circe"      %%  "circe-generic"     %   versions.circe,
+    "io.circe"      %%  "circe-parser"      %   versions.circe,
+    "com.twitter"   %%  "finagle-stats"     %   versions.finagle,
+    "com.twitter"   %%  "finatra-http"      %   versions.finatra,
+    "com.twitter"   %%  "twitter-server"    %   versions.twitterServer
   )
 }
 
