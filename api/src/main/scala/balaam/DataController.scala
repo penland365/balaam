@@ -1,23 +1,26 @@
 package codes.penland365
 package balaam
 
+import codes.penland365.balaam.requests.GithubRequest
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.request.RouteParam
 
 final class DataController extends Controller {
-  import DataController.{GithubRequest, WeatherRequest}
+  import DataController.WeatherRequest
 
   prefix("/data") {
     get("/weather/:latitude/:longitude") { request: WeatherRequest =>
       services.GetWeather(request).flatMap(domain.EncodeWeather)
     }
-    get("/github/:token/notifications") { request: GithubRequest =>
-      services.ListNotifications(request.token).map(_.size)
+    get("/github/:id/notifications") { request: GithubRequest =>
+      services.ListNotifications(request.id).map(_.size)
+    }
+    get("/github/:id/branch") { request: GithubRequest =>
+      services.GetBranch(request.id).map(_.githubBranch.getOrElse(""))
     }
   }
 }
 
 object DataController {
   case class WeatherRequest(@RouteParam latitude: Double, @RouteParam longitude: Double)
-  case class GithubRequest(@RouteParam token: String)
 }

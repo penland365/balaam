@@ -1,15 +1,14 @@
 package codes.penland365
 package balaam
 
-import codes.penland365.balaam.clients.DarkSky
+import codes.penland365.balaam.clients.Github.Notification
+import codes.penland365.balaam.clients.{DarkSky, Github}
+import codes.penland365.balaam.DataController.WeatherRequest
 import codes.penland365.balaam.domain._
 import com.twitter.finagle.Service
-import codes.penland365.balaam.clients.Github
-import codes.penland365.balaam.clients.Github.Notification
 import com.twitter.storehaus.cache.MutableTTLCache
 import com.twitter.util.logging.Logging
 import com.twitter.util.{Duration, Future}
-import codes.penland365.balaam.DataController.WeatherRequest
 
 object services extends Logging {
 
@@ -34,18 +33,23 @@ object services extends Logging {
     }
   }
 
-  val ListNotifications: Service[String, List[Notification]] = new Service[String, List[Notification]] {
-    private val cache = MutableTTLCache[String, List[Notification]](Duration.fromSeconds(60), 7)
+  val ListNotifications: Service[Int, List[Notification]] = new Service[Int, List[Notification]] {
+    private val cache = MutableTTLCache[Int, List[Notification]](Duration.fromSeconds(60), 7)
 
-    override def apply(request: String): Future[List[Notification]] = cache.get(request) match {
+    override def apply(id: Int): Future[List[Notification]] = cache.get(id) match {
       case Some(x) => Future.value(x)
-      case None    => {
-        debug(s"Fetching new Github Notifications")
-        Github.GetNotifications(request) map { notifications =>
-          cache += ((request, notifications))
-          notifications
-        }
+      case None    => for {
+        user          <- db.Users.selectById(id)
+        _             =  debug(s"Fetching new Github Notifications for $user")
+        notifications <- Github.GetNotifications(user.githubAccessToken.getOrElse(""))
+      } yield {
+        cache += ((id, notifications))
+        notifications
       }
     }
+  }
+
+  val GetBranch: Service[Int, db.User] = new Service[Int, db.User] {
+    override def apply(id: Int): Future[db.User] = db.Users.selectById(id)
   }
 }

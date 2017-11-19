@@ -4,7 +4,7 @@ val buildName = "balaam"
 
 name := buildName
 
-version := "0.3.0-M2"
+version := "0.3.0-M4"
 
 organization := "codes.penland365"
 
@@ -22,7 +22,7 @@ lazy val compilerOptions = Seq(
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
   "-Ywarn-unused-import",
-//  "-Xfatal-warnings",
+  "-Xfatal-warnings",
   "-Xfuture"
 )
 
@@ -36,6 +36,7 @@ lazy val versions = new {
   val util          = "17.11.0"
   val storehaus     = "0.15.0"
   val slf           = "1.7.25"
+  val roc           = "0.0.6"
 }
 
 lazy val testDependencies = Seq(
@@ -46,16 +47,17 @@ lazy val testDependencies = Seq(
 
 libraryDependencies ++= {
   Seq(
-    "io.circe"      %%  "circe-core"        %   versions.circe,
-    "io.circe"      %%  "circe-generic"     %   versions.circe,
-    "io.circe"      %%  "circe-parser"      %   versions.circe,
-    "com.twitter"   %%  "finagle-stats"     %   versions.finagle,
-    "com.twitter"   %%  "finatra-http"      %   versions.finatra,
-    "com.twitter"   %%  "twitter-server"    %   versions.twitterServer,
-    "com.twitter"   %%  "util-slf4j-api"    %   versions.util,
-    "com.twitter"   %%  "storehaus-cache"   %   versions.storehaus,
-    "org.slf4j"     %   "slf4j-simple"      %   versions.slf
-
+    "com.github.finagle"    %%  "roc-core"          %   versions.roc,
+    "com.github.finagle"    %%  "roc-types"         %   versions.roc,
+    "io.circe"              %%  "circe-core"        %   versions.circe,
+    "io.circe"              %%  "circe-generic"     %   versions.circe,
+    "io.circe"              %%  "circe-parser"      %   versions.circe,
+    "com.twitter"           %%  "finagle-stats"     %   versions.finagle,
+    "com.twitter"           %%  "finatra-http"      %   versions.finatra,
+    "com.twitter"           %%  "twitter-server"    %   versions.twitterServer,
+    "com.twitter"           %%  "util-slf4j-api"    %   versions.util,
+    "com.twitter"           %%  "storehaus-cache"   %   versions.storehaus,
+    "org.slf4j"             %   "slf4j-simple"      %   versions.slf
   )
 }
 

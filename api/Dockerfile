@@ -23,4 +23,4 @@ RUN tar -Jxvf /tmp/balaam-$VERSION.txz -C /usr/local/src/balaam && \
 
 # It's Showtime
 EXPOSE 7171
-CMD /usr/local/bin/balaam -- -log.level=$LOG_LEVEL -darksky.api-key=$DARKSKY_API_KEY -http.port=$HTTP_PORT
+CMD /usr/local/bin/balaam -- -log.level=$LOG_LEVEL -darksky.api-key=$DARKSKY_API_KEY -http.port=$HTTP_PORT -db.host=$DATABASE_HOST -db.port=$DATABASE_PORT

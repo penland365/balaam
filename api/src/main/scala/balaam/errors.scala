@@ -22,4 +22,6 @@ object errors {
     extends GithubError(s"ERROR - Unknown HTTP Response Code [${response.status}]")
   final case class GithubJsonDecodingFailure(error: Error, json: String)
     extends GithubError(s"ERROR - Could not JSON Deocde Github HTTP 200, Error[$error], JSON[$json].")
+
+  final case class BalaamUserNotFound(message: String) extends RuntimeException(message)
 }
