@@ -4,7 +4,9 @@ package balaam
 import codes.penland365.balaam.clients.Github.Notification
 import codes.penland365.balaam.clients.{DarkSky, Github}
 import codes.penland365.balaam.DataController.WeatherRequest
+import codes.penland365.balaam.db.Users
 import codes.penland365.balaam.domain._
+import codes.penland365.balaam.requests.GithubBranchRequest
 import com.twitter.finagle.Service
 import com.twitter.storehaus.cache.MutableTTLCache
 import com.twitter.util.logging.Logging
@@ -51,5 +53,13 @@ object services extends Logging {
 
   val GetBranch: Service[Int, db.User] = new Service[Int, db.User] {
     override def apply(id: Int): Future[db.User] = db.Users.selectById(id)
+  }
+
+  val UpdateBranch: Service[GithubBranchRequest, Unit] = new Service[GithubBranchRequest, Unit] {
+    override def apply(request: GithubBranchRequest): Future[Unit] = for {
+      user        <- db.Users.selectById(request.id)
+      updatedUser =  user.fromUpdatedBranch(Some(request.branch))
+      completed   <- Users.updateBranch(updatedUser)
+    } yield ()
   }
 }

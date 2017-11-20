@@ -9,7 +9,12 @@ import roc.types.decoders._
 import java.time.ZonedDateTime
 
 case class User(id: Int, username: String, githubAccessToken: Option[String],
-  githubBranch: Option[String], lastModifiedAt: ZonedDateTime, insertedAt: ZonedDateTime)
+  githubBranch: Option[String], lastModifiedAt: ZonedDateTime, insertedAt: ZonedDateTime) {
+
+  def fromUpdatedBranch(newBranch: Option[String]): User =
+    new User(id = id, username = username, githubAccessToken = githubAccessToken, githubBranch = newBranch,
+      lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
+}
 
 private[db] object User {
   implicit val userDecoder: Postgresql.Decoder[User] = new Postgresql.Decoder[User] {
@@ -41,6 +46,17 @@ object Users {
       val sql = Request(s"SELECT * FROM balaam.users WHERE id = $id;")
       postgres.errorMessage_=(s"ERROR - no balaam user found for id $id.")
       postgres(sql)
+    }
+  }
+
+  val updateBranch: Service[User, String] = new Service[User, String] {
+    override def apply(user: User): Future[String] = {
+      val branchSql = user.githubBranch match {
+        case Some(x) => s"'$x'"
+        case None    => "DEFAULT"
+      }
+      val sql = Request(s"UPDATE balaam.users SET github_branch = $branchSql WHERE id = ${user.id};")
+      Postgresql.client.query(sql).map(_.completedCommand)
     }
   }
 }

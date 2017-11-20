@@ -1,7 +1,7 @@
 package codes.penland365
 package balaam
 
-import codes.penland365.balaam.requests.GithubRequest
+import codes.penland365.balaam.requests.{GithubBranchRequest, GithubRequest}
 import com.twitter.finatra.http.Controller
 import com.twitter.finatra.request.RouteParam
 
@@ -17,6 +17,9 @@ final class DataController extends Controller {
     }
     get("/github/:id/branch") { request: GithubRequest =>
       services.GetBranch(request.id).map(_.githubBranch.getOrElse(""))
+    }
+    post("/github/:id/branch") { request: GithubBranchRequest =>
+      services.UpdateBranch(request).map(_ => response.created)
     }
   }
 }
