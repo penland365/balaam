@@ -1,0 +1,7 @@
+#! /usr/bin/env bash
+
+source $HOME/.location
+source $HOME/.balaam.conf
+
+WEATHER=$(curl -X GET https://balaam.novolabs.codes/data/weather/$LATITUDE/$LONGITUDE)
+echo $WEATHER

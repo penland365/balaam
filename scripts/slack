@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+source $HOME/.balaam.conf
+
+SLACK=$(curl -s -X GET -u $BALAAM_USER":"$BALAAM_PASSWORD --header "Accept: text/plain" $BALAAM_URL"/data/slack")
+echo $SLACK

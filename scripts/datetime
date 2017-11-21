@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# source location file for timezone
+source ~/.location
+
+DATETIME=$(date +"%a %h %d %H:%M %Z")
+echo $DATETIME

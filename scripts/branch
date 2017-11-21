@@ -1,0 +1,6 @@
+#! /usr/bin/env bash
+
+source $HOME/.balaam.conf
+
+BRANCH=$(curl -s -X GET https://balaam.novolabs.codes/data/github/1/branch)
+echo $BRANCH
