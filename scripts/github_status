@@ -1,0 +1,46 @@
+#! /usr/bin/env bash
+
+source $HOME/.balaam.conf
+
+get_tmux_option() {
+	local option="$1"
+	local default_value="$2"
+	local option_value="$(tmux show-option -gqv "$option")"
+	if [ -z "$option_value" ]; then
+		echo "$default_value"
+	else
+		echo "$option_value"
+	fi
+}
+
+pending_bg_color=""
+failure_bg_color=""
+success_bg_color=""
+
+pending_default_bg_color="#[bg=yellow]"
+failure_default_bg_color="#[bg=red]"
+success_default_bg_color="#[bg=green]"
+
+get_bg_color_settings() {
+  pending_bg_color=$(get_tmux_option "@pending_bg_color" "$pending_default_bg_color")
+  failure_bg_color=$(get_tmux_option "@failure_bg_color" "$failure_default_bg_color")
+  success_bg_color=$(get_tmux_option "@success_bg_color" "$success_default_bg_color")
+}
+
+print_bg_color() {
+  #local status=$(curl -H "Authorization: token a62a027c7c731596d51c150b9ec43e7b7dd8070c" https://api.github.com/repos/novolabs/unum/commits/9668963adba0169f8bda31b5eda5149f85e63d1d/status | jq '.state')
+  local status=$(curl -s https://balaam.novolabs.codes/data/github/1/branch/status)
+  if [ $status == "success" ]; then
+    echo "$success_bg_color"
+  elif [ $status == "failure" ]; then
+    echo "$failure_bg_color"
+  else
+    echo "$pending_bg_color"
+  fi
+}
+
+main() {
+  get_bg_color_settings
+  print_bg_color
+}
+main
