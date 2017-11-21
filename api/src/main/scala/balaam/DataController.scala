@@ -12,14 +12,19 @@ final class DataController extends Controller {
     get("/weather/:latitude/:longitude") { request: WeatherRequest =>
       services.GetWeather(request).flatMap(domain.EncodeWeather)
     }
-    get("/github/:id/notifications") { request: GithubRequest =>
-      services.ListNotifications(request.id).map(_.size)
-    }
-    get("/github/:id/branch") { request: GithubRequest =>
-      services.GetBranch(request.id).map(_.githubBranch.getOrElse(""))
-    }
-    post("/github/:id/branch") { request: GithubBranchRequest =>
-      services.UpdateBranch(request).map(_ => response.created)
+    prefix("/github") {
+      get("/:id/notifications") { request: GithubRequest =>
+        services.ListNotifications(request.id).map(_.size)
+      }
+      get("/:id/branch") { request: GithubRequest =>
+        services.GetBranch(request.id).map(_.githubBranch.getOrElse(""))
+      }
+      post("/:id/branch") { request: GithubBranchRequest =>
+        services.UpdateBranch(request).map(_ => response.created)
+      }
+      get("/:id/branch/status") { request: GithubRequest =>
+        services.GetBranchStatus(request)
+      }
     }
   }
 }

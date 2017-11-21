@@ -6,7 +6,7 @@ import codes.penland365.balaam.clients.{DarkSky, Github}
 import codes.penland365.balaam.DataController.WeatherRequest
 import codes.penland365.balaam.db.Users
 import codes.penland365.balaam.domain._
-import codes.penland365.balaam.requests.GithubBranchRequest
+import codes.penland365.balaam.requests.{GithubBranchRequest, GithubRequest}
 import com.twitter.finagle.Service
 import com.twitter.storehaus.cache.MutableTTLCache
 import com.twitter.util.logging.Logging
@@ -61,5 +61,36 @@ object services extends Logging {
       updatedUser =  user.fromUpdatedBranch(Some(request.branch))
       completed   <- Users.updateBranch(updatedUser)
     } yield ()
+  }
+
+  val GetBranchStatus: Service[GithubRequest, String] = new Service[GithubRequest, String] {
+    private val cache = MutableTTLCache[Int, String](Duration.fromSeconds(20), 7)
+
+    override def apply(request: GithubRequest): Future[String] = cache.get(request.id) match {
+      case Some(x) => Future.value(x)
+      case None    => for {
+        user     <- db.Users.selectById(request.id)
+        branches <- Github.ListBranches(Github.ListBranchesReq(user.githubAccessToken.get, "novolabs", "unum"))
+        status   <- parseSha(user.githubBranch, branches) match {
+          case None      => Future.value(new Github.BranchStatus("ERROR", ""))
+          case Some(sha) => Github.GetBranchStatus(Github.GetBranchStatusReq(user.githubAccessToken.get,
+                                                                             "novolabs",
+                                                                             "unum",
+                                                                             sha))
+        }
+      } yield {
+        cache += ((request.id, status.state))
+        status.state
+      }
+    }
+
+
+    private def parseSha(branchName: Option[String], branches: List[Github.Branch]): Option[String] = branchName match {
+      case None    => None
+      case Some(x) => {
+        val branch = branches.filter(y => y.name == x)
+        if(branch.isEmpty) None else Some(branch.head.commit.sha)
+      }
+    }
   }
 }

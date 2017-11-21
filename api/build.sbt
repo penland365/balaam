@@ -4,7 +4,7 @@ val buildName = "balaam"
 
 name := buildName
 
-version := "0.3.0-M5"
+version := "0.3.0-M6"
 
 organization := "codes.penland365"
 
@@ -21,8 +21,8 @@ lazy val compilerOptions = Seq(
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
-  "-Ywarn-unused-import",
-  "-Xfatal-warnings",
+  //"-Ywarn-unused-import",
+  //"-Xfatal-warnings",
   "-Xfuture"
 )
 
