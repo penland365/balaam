@@ -86,7 +86,7 @@ object DarkSky extends Logging {
     precipProbability: Option[Double], precipType: Option[String], pressure: Option[Double], summary: Option[String],
     sunriseTime: Option[Long], sunsetTime: Option[Long], temperature: Option[Double], temperatureHigh: Option[Double],
     temperatureHighTime: Option[Long], temperatureLow: Option[Double], temperatureLowTime: Option[Long],
-    time: Long, uvIndex: Option[Int], unIndexTime: Option[Long], visibility: Option[Int], windBearing: Option[Int],
+    time: Long, uvIndex: Option[Int], unIndexTime: Option[Long], visibility: Option[Double], windBearing: Option[Int],
     windGust: Option[Double], windSpeed: Option[Double]) {
 
     def emojiForIcon: String = icon match {

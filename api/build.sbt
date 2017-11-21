@@ -4,11 +4,11 @@ val buildName = "balaam"
 
 name := buildName
 
-version := "0.3.0-M6"
+version := "0.3.0-M7"
 
 organization := "codes.penland365"
 
-scalaVersion := "2.12.3"
+scalaVersion := "2.12.4"
 
 lazy val compilerOptions = Seq(
   "-deprecation",
@@ -21,8 +21,8 @@ lazy val compilerOptions = Seq(
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-value-discard",
-  //"-Ywarn-unused-import",
-  //"-Xfatal-warnings",
+  "-Ywarn-unused-import",
+  "-Xfatal-warnings",
   "-Xfuture"
 )
 
