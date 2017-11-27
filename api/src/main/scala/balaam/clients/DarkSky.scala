@@ -1,11 +1,10 @@
 package codes.penland365
 package balaam.clients
 
-import codes.penland365.balaam.errors.{BadDarkSkyRequest, DarkSkyJsonDecodingFailure,
-  DarkSkyResourceNotFound, InvalidDarkSkyApiKey, UnknownDarkSkyResponse}
+import codes.penland365.balaam.errors._
 import codes.penland365.balaam.Main
+import codes.penland365.balaam.requests._
 import com.twitter.finagle.http.{Request, RequestBuilder, Status}
-import codes.penland365.balaam.DataController.WeatherRequest
 import com.twitter.finagle.{Addr, Address, Http, Name, Service}
 import com.twitter.io.Buf
 import com.twitter.util.logging.Logging

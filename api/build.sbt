@@ -4,7 +4,7 @@ val buildName = "balaam"
 
 name := buildName
 
-version := "0.3.0-M7"
+version := "0.3.0-M9"
 
 organization := "codes.penland365"
 
@@ -36,7 +36,7 @@ lazy val versions = new {
   val util          = "17.11.0"
   val storehaus     = "0.15.0"
   val slf           = "1.7.25"
-  val roc           = "0.0.6"
+  val roc           = "0.0.7-M1"
 }
 
 lazy val testDependencies = Seq(

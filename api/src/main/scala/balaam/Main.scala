@@ -25,5 +25,7 @@ class BalaamServer extends HttpServer {
     .filter[TraceIdMDCFilter[Request, Response]]
     .filter[CommonFilters]
     .add[DataController]
+    .exceptionMapper[BalaamUserNotFoundExceptionMapper]
+    .exceptionMapper[GithubBranchExistsExceptionMapper]
   }
 }

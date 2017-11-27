@@ -3,16 +3,27 @@ package balaam
 
 import codes.penland365.balaam.clients.Github.Notification
 import codes.penland365.balaam.clients.{DarkSky, Github}
-import codes.penland365.balaam.DataController.WeatherRequest
-import codes.penland365.balaam.db.Users
+import codes.penland365.balaam.db.{InsertUser, Users}
 import codes.penland365.balaam.domain._
-import codes.penland365.balaam.requests.{GithubBranchRequest, GithubRequest}
+import codes.penland365.balaam.requests._
 import com.twitter.finagle.Service
 import com.twitter.storehaus.cache.MutableTTLCache
 import com.twitter.util.logging.Logging
 import com.twitter.util.{Duration, Future}
 
 object services extends Logging {
+
+  val CreateUser: Service[CreateUserRequest, Int] = new Service[CreateUserRequest, Int] {
+    override def apply(request: CreateUserRequest): Future[Int] =
+      Users.insert(InsertUser(request))
+  }
+
+  val DeleteUser: Service[DeleteUserRequest, Unit] = new Service[DeleteUserRequest, Unit] {
+    override def apply(request: DeleteUserRequest): Future[Unit] = for {
+      user <- Users.selectById(request.id)
+      _    <- Users.deleteById(user.id)
+    } yield ()
+  }
 
   val GetWeather: Service[WeatherRequest, Weather] = new Service[WeatherRequest, Weather] {
     private val cache = MutableTTLCache[Int, DarkSky.Forecast](Duration.fromSeconds(90), 7)
@@ -36,7 +47,7 @@ object services extends Logging {
   }
 
   val ListNotifications: Service[Int, List[Notification]] = new Service[Int, List[Notification]] {
-    private val cache = MutableTTLCache[Int, List[Notification]](Duration.fromSeconds(60), 7)
+    private val cache = MutableTTLCache[Int, List[Notification]](Duration.fromSeconds(20), 7)
 
     override def apply(id: Int): Future[List[Notification]] = cache.get(id) match {
       case Some(x) => Future.value(x)
@@ -51,39 +62,48 @@ object services extends Logging {
     }
   }
 
-  val GetBranch: Service[Int, db.User] = new Service[Int, db.User] {
-    override def apply(id: Int): Future[db.User] = db.Users.selectById(id)
+  val GetBranch: Service[Int, db.GithubBranch] = new Service[Int, db.GithubBranch] {
+    override def apply(id: Int): Future[db.GithubBranch] = db.GithubBranches.selectByUserId(id)
   }
 
-  val UpdateBranch: Service[GithubBranchRequest, Unit] = new Service[GithubBranchRequest, Unit] {
-    override def apply(request: GithubBranchRequest): Future[Unit] = for {
-      user        <- db.Users.selectById(request.id)
-      updatedUser =  user.fromUpdatedBranch(Some(request.branch))
-      completed   <- Users.updateBranch(updatedUser)
-    } yield ()
+  val UpdateBranch: Service[PutGithubBranch, String] = new Service[PutGithubBranch, String] {
+    override def apply(request: PutGithubBranch): Future[String] = for {
+      user      <- db.Users.selectById(request.user)
+      update    =  db.GithubBranchUpdate(user, request)
+      completed <- db.GithubBranches.update(update)
+      _         =  info(s"GithubBranchUpdate[$update] completed command $completed")
+    } yield completed
+  }
+
+  val CreateBranch: Service[GithubBranchRequest, Int] = new Service[GithubBranchRequest, Int] {
+    override def apply(request: GithubBranchRequest): Future[Int] = for {
+      user   <- db.Users.selectById(request.id)
+      insert =  db.GithubBranchInsert(user, request)
+      id     <- db.GithubBranches.insert(insert)
+    } yield id
   }
 
   val GetBranchStatus: Service[GithubRequest, String] = new Service[GithubRequest, String] {
-    private val cache = MutableTTLCache[Int, String](Duration.fromSeconds(20), 7)
+    private val cache = MutableTTLCache[Int, String](Duration.fromSeconds(10), 7)
 
-    override def apply(request: GithubRequest): Future[String] = cache.get(request.id) match {
+    override def apply(request: GithubRequest): Future[String] = cache.get(request.hashCode) match {
       case Some(x) => Future.value(x)
       case None    => for {
         user     <- db.Users.selectById(request.id)
-        branches <- Github.ListBranches(Github.ListBranchesReq(user.githubAccessToken.get, "novolabs", "unum"))
-        status   <- parseSha(user.githubBranch, branches) match {
+        branch   <- db.GithubBranches.selectByUserId(request.id)
+        branches <- Github.ListBranches(Github.ListBranchesReq(user.githubAccessToken.get, branch.owner, branch.repo))
+        status   <- parseSha(Some(branch.branch), branches) match {
           case None      => Future.value(new Github.BranchStatus("ERROR", ""))
           case Some(sha) => Github.GetBranchStatus(Github.GetBranchStatusReq(user.githubAccessToken.get,
-                                                                             "novolabs",
-                                                                             "unum",
+                                                                             branch.owner,
+                                                                             branch.repo,
                                                                              sha))
         }
       } yield {
-        cache += ((request.id, status.state))
+        cache += ((request.hashCode, status.state))
         status.state
       }
     }
-
 
     private def parseSha(branchName: Option[String], branches: List[Github.Branch]): Option[String] = branchName match {
       case None    => None

@@ -1,19 +1,21 @@
 package codes.penland365
 package balaam.db
 
-import com.twitter.finagle.Service
 import codes.penland365.balaam.errors.BalaamUserNotFound
+import codes.penland365.balaam.requests.CreateUserRequest
+import com.twitter.finagle.Service
 import com.twitter.util.Future
+import com.twitter.util.logging.Logging
+import java.time.ZonedDateTime
 import roc.postgresql.{Request, Result, Row}
 import roc.types.decoders._
-import java.time.ZonedDateTime
 
 case class User(id: Int, username: String, githubAccessToken: Option[String],
-  githubBranch: Option[String], lastModifiedAt: ZonedDateTime, insertedAt: ZonedDateTime) {
+  lastModifiedAt: ZonedDateTime, insertedAt: ZonedDateTime) {
 
-  def fromUpdatedBranch(newBranch: Option[String]): User =
-    new User(id = id, username = username, githubAccessToken = githubAccessToken, githubBranch = newBranch,
-      lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
+  //def fromUpdatedBranch(newBranch: Option[String]): User =
+  //  new User(id = id, username = username, githubAccessToken = githubAccessToken, githubBranch = newBranch,
+  //    lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
 }
 
 private[db] object User {
@@ -29,15 +31,14 @@ private[db] object User {
     val id                = r.get('id).as[Int]
     val username          = r.get('username).as[String]
     val githubAccessToken = r.get('github_access_token).as[Option[String]]
-    val githubBranch      = r.get('github_branch).as[Option[String]]
     val lastModifiedAt    = r.get('last_modified_at).as[ZonedDateTime]
     val insertedAt        = r.get('inserted_at).as[ZonedDateTime]
     new User(id = id, username = username, githubAccessToken = githubAccessToken,
-      githubBranch = githubBranch, lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
+      lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
   }
 }
 
-object Users {
+object Users extends Logging {
 
   val selectById: Service[Int, User] = new Service[Int, User] {
     private val postgres = new Postgresql.Select[User]()
@@ -49,14 +50,48 @@ object Users {
     }
   }
 
-  val updateBranch: Service[User, String] = new Service[User, String] {
-    override def apply(user: User): Future[String] = {
-      val branchSql = user.githubBranch match {
-        case Some(x) => s"'$x'"
-        case None    => "DEFAULT"
-      }
-      val sql = Request(s"UPDATE balaam.users SET github_branch = $branchSql WHERE id = ${user.id};")
+  val insert: Service[InsertUser, Int] = new Service[InsertUser, Int] {
+
+    override def apply(request: InsertUser): Future[Int] = {
+      val sql = request.insertSql
+      trace(sql)
+      Postgresql.client.query(sql).map(result => {
+        result.head.get('id).as[Int]
+      })
+    }
+  }
+
+  val deleteById: Service[Int, String] = new Service[Int, String] {
+    override def apply(id: Int): Future[String] = {
+      val sql = Request(s"DELETE FROM balaam.users WHERE id = $id;")
+      trace(sql)
       Postgresql.client.query(sql).map(_.completedCommand)
     }
   }
+
+  //val updateBranch: Service[User, String] = new Service[User, String] {
+  //  override def apply(user: User): Future[String] = {
+  //    val branchSql = user.githubBranch match {
+  //      case Some(x) => s"'$x'"
+  //      case None    => "DEFAULT"
+  //    }
+  //    val sql = Request(s"UPDATE balaam.users SET github_branch = $branchSql WHERE id = ${user.id};")
+  //    Postgresql.client.query(sql).map(_.completedCommand)
+  //  }
+  //}
+}
+
+case class InsertUser(username: String, githubAccessToken: Option[String]) {
+  def insertSql: Request = {
+    val gatSql = githubAccessToken match {
+      case None    => "DEFAULT"
+      case Some(x) => s"""'$x'"""
+    }
+    Request(s"INSERT INTO balaam.users (username, github_access_token) VALUES ('$username', $gatSql) RETURNING id;")
+  }
+}
+
+object InsertUser {
+  def apply(request: CreateUserRequest): InsertUser =
+    new InsertUser(request.username, request.githubAccessToken)
 }

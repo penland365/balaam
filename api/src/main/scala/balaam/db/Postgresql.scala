@@ -4,7 +4,9 @@ package balaam.db
 import codes.penland365.balaam.Main
 import com.twitter.finagle.Service
 import com.twitter.util.Future
-import roc.postgresql.{Request, Result}
+import java.time.ZonedDateTime
+import roc.postgresql.{Request, Result, Row}
+import roc.types.decoders._
 
 private[db] object Postgresql {
 
@@ -25,6 +27,16 @@ private[db] object Postgresql {
     } yield a
 
     def errorMessage_=(newMessage: String): Unit = errMsg = newMessage
+  }
+
+  private[db] def row2User(r: Row): User = {
+    val id                = r.get('user_id).as[Int]
+    val username          = r.get('user_username).as[String]
+    val githubAccessToken = r.get('user_github_access_token).as[Option[String]]
+    val lastModifiedAt    = r.get('user_last_modified_at).as[ZonedDateTime]
+    val insertedAt        = r.get('user_inserted_at).as[ZonedDateTime]
+    new User(id = id, username = username, githubAccessToken = githubAccessToken,
+      lastModifiedAt = lastModifiedAt, insertedAt = insertedAt)
   }
 }
 
