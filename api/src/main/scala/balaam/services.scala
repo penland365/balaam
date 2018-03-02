@@ -27,7 +27,6 @@ object services extends Logging {
 
   val GetWeather: Service[WeatherRequest, Weather] = new Service[WeatherRequest, Weather] {
     private val cache = MutableTTLCache[Int, DarkSky.Forecast](Duration.fromSeconds(90), 7)
-
     override def apply(request: WeatherRequest): Future[Weather] = cache.get(request.hashCode) match {
       case Some(x) => Future.value(forecastToWeather(x))
       case None    => {

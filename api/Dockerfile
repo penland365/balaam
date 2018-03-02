@@ -1,4 +1,4 @@
-FROM fedora:26
+FROM fedora:27
 MAINTAINER Jeffrey.N.Davis@gmail.com
 
 RUN set -ex && \
@@ -23,4 +23,4 @@ RUN tar -Jxvf /tmp/balaam-$VERSION.txz -C /usr/local/src/balaam && \
 
 # It's Showtime
 EXPOSE 7171
-CMD /usr/local/bin/balaam -- -log.level=$LOG_LEVEL -darksky.api-key=$DARKSKY_API_KEY -http.port=$HTTP_PORT -db.host=$DATABASE_HOST -db.port=$DATABASE_PORT
+CMD /usr/local/bin/balaam -- -log.level=$LOG_LEVEL -darksky.api-key=$DARKSKY_API_KEY -http.port=$HTTP_PORT -db.host=$DB_HOST -db.port=$DB_PORT -db.name=$DB_NAME -db.user=$DB_USER -db.passwd=$DB_PASSWD
