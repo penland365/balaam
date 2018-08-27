@@ -4,7 +4,7 @@ val buildName = "balaam"
 
 name := buildName
 
-version := "0.4.1"
+version := "0.4.2"
 
 organization := "codes.penland365"
 
