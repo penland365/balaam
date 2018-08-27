@@ -29,9 +29,18 @@ install: | build/docker
 	docker push $(DOCKER_IMAGE)
 
 tasks:
-	@echo "build/docker - builds the Dockerimage"
-	@echo "build - creates the build directory"
+	@echo "Used to build Balaam and the Balaam Docker images."
+	@echo ""
+	@echo "build/docker           - builds the Dockerimage"
+	@echo "build                  - creates the build directory"
 	@echo "build/packageXzTarball - creates the Java Tarball that is a Fat Jar"
+	@echo "clean                  - runs sbt clean and removes all Docker build artifacts"
+	@echo "dockerfile             - echos which Dockerfile is used by the Makefile, cats it to STDOUT"
+	@echo "dockerimage            - displays the Docker image used by this Makefile, i.e. penland365/baalam:vVERSION"
+	@echo "dockerrepo             - echos the Docker repo, i.e. penland365/balaam"
+	@echo "install                - pushes the built Docker image to the Docker remote repository."
+	@echo "tasks                  - this"
+	@echo "version                - echos the current project version set in sbt"
 
 version:
 	@echo $(VERSION)
