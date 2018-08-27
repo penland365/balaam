@@ -8,3 +8,6 @@ project/project/*
 
 # Ignore generated files
 src/generated/*
+
+# Docker and Makefile build output
+build/*

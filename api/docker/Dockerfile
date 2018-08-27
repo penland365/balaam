@@ -1,11 +1,12 @@
-FROM fedora:27
+FROM ubuntu:17.10
 MAINTAINER Jeffrey.N.Davis@gmail.com
 
-RUN set -ex && \
-  yum upgrade -y && \
-  yum install -y java-1.8.0-openjdk && \
-  yum install -y xz && \
-  yum install -y xz-devel
+RUN set -ex                                                       && \
+  apt-get update && apt-get dist-upgrade -y && apt-get upgrade -y && \
+  apt-get -y install bash \
+    vim                   \
+    curl                  \
+    openjdk-8-jre
 
 ARG VERSION
 ENV VERSION=$VERSION
@@ -22,5 +23,4 @@ RUN tar -Jxvf /tmp/balaam-$VERSION.txz -C /usr/local/src/balaam && \
   rm /tmp/balaam-$VERSION.txz
 
 # It's Showtime
-EXPOSE 7171
 CMD /usr/local/bin/balaam -- -log.level=$LOG_LEVEL -darksky.api-key=$DARKSKY_API_KEY -http.port=$HTTP_PORT -db.host=$DB_HOST -db.port=$DB_PORT -db.name=$DB_NAME -db.user=$DB_USER -db.passwd=$DB_PASSWD

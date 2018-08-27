@@ -2,6 +2,7 @@ package codes.penland365
 package balaam
 
 import codes.penland365.balaam.requests._
+import com.twitter.finagle.http.Request
 import com.twitter.finatra.http.Controller
 
 final class DataController extends Controller {
@@ -31,5 +32,12 @@ final class DataController extends Controller {
   }
   get("/data/weather/:latitude/:longitude") { request: WeatherRequest =>
     services.GetWeather(request).flatMap(domain.EncodeWeather)
+  }
+
+  get("/admin/health") { _: Request =>
+    "OK"
+  }
+  get("/admin/ping") { _: Request =>
+    "pong"
   }
 }
